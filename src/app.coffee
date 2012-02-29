@@ -5,7 +5,7 @@ Level = require './level'
 Player = require './player'
 
 clientFiles = new static.Server()
-levels[0] = new Level true
+levels = [new Level true]
 ourState = new gameState levels
 
 server = http.createServer (req, res) ->
