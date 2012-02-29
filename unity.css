@@ -1,0 +1,42 @@
+body {
+    background-color:#000000;
+}
+
+#map { 
+    font-family:"Courier New",monospace;
+    font-size: 1em;
+    width:1000px;
+    height:75%;
+    background-color:#000000;
+    color:#FFFFFF;
+}
+
+#login {
+    font-family:"Courier New",monospace;
+    font-size:1.5em;
+    width:1000px;
+    height:75%;
+    background-color:#000000;
+    color:#FFFFFF;
+}
+
+#messages {
+    width:33%;
+    height: 25%;
+    border: 1px solid grey;
+    color: #FFFFFF;
+    overflow: hidden auto;
+    font-size:.75em;
+}
+
+#floater    {
+    float:left; 
+    height:50%; 
+    margin-bottom:-20px;
+}
+
+#content	{
+    clear:both; 
+    height:240px; 
+    position:relative;
+}
