@@ -1,20 +1,24 @@
 class Level
     data = []
+    data[x] = [] for x in [0..19]
     players = {}
     
     constructor: (is_town) ->
         if is_town
-            data[row][col] = "." for row in [0..20] for col in [0..80]
-        true
+            data[row][col] = "." for row in [0..19] for col in [0..79]
+
+    addPlayer: (id, player) ->
+	    players[id] = player
         
     toString: () ->
         tempCopy = []
-        tempCopy[row] = data[row][0..data[row].length] for row in data
+        tempCopy.push row[0...row.length] for row in data
         for id, player of players
-            tempCopy[player.y][player.x] = "@"
+            whereishe = player.getPos()
+            tempCopy[whereishe[1]][whereishe[0]] = "@"
         map = "--------------------------------------------------------------------------------\n"
         map += "|" + row.join("") + "|\n" for row in tempCopy
         map += "--------------------------------------------------------------------------------"
         map
 
-exports.Level = Level
+module.exports = Level

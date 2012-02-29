@@ -2,6 +2,16 @@ class gameState
     players = {}
     levels = []
     
-    constructor: (@levels) ->
+    constructor: (town) ->
+        levels[0] = town
 
-exports.gameState = gameState
+    addPlayer: (id, player) ->
+	    players[id] = player
+
+    getPlayer: (id) ->
+        players[id]
+
+    getLevel: (dlvl) ->
+        levels[dlvl]
+		
+module.exports = gameState

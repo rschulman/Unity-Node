@@ -1,5 +1,9 @@
 class Player
-
+    x = 40
+    y = 10
     constructor: (@name, @level) ->
 
-exports.Player = Player
+    getPos: () ->
+       [x, y]
+
+module.exports = Player
