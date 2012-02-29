@@ -2,4 +2,4 @@ class Player
 
     constructor: (@name, @level) ->
 
-export Player
+exports.Player = Player

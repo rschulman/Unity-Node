@@ -4,4 +4,4 @@ class gameState
     
     constructor: (@levels) ->
 
-export gameState
+exports.gameState = gameState

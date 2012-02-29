@@ -11,7 +11,6 @@
                 <p style="text-align:center">
                     <label for="nameText">What is your name, traveller?</label>
                     <input type="text" id="nameText"/>
-                    <button id="sendButton">Send</button>
                 </p>
             </div>             
         </div>
@@ -40,11 +39,13 @@
                     $('#login').replaceWith("<div id='map'>" + message + "</div>");
                 })
 
-                $('#sendButton').bind('click', function() {
-                    var message = $('#messageText').val();
-                    webSocket.send(message);
-                    $('#messageText').val('');
-                    webSocket.emit('send map');
+                $('#nameText').keypress(function(event) {
+                    if (event.which == 13) {
+                        var message = $('#nameText').val();
+                        webSocket.emit('new user', message);
+                        $('#nameText').val('');
+                        webSocket.emit('send map');
+                    }
                 });
                 
             });
