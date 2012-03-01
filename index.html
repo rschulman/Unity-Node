@@ -4,22 +4,27 @@
         <link rel="stylesheet" type="text/css" href="unity.css" />
     </head>
     <body>
-        <div id="login">
-            <div id="floater">
-            </div>
-            <div id="content">
-                <p style="text-align:center">
-                    <label for="nameText">What is your name, traveller?</label>
-                    <input type="text" id="nameText"/>
-                </p>
-            </div>             
+		<div id="thegame">
+        	<div id="map">
+        	</div>
+		</div>
+		<div id="login">
+        	<div id="floater">
+        	</div>
+        	<div id="content">
+            	<p style="text-align:center">
+                	<label for="nameText">What is your name, traveller?</label>
+                	<input type="text" id="nameText"/>
+            	</p>
+        	</div> 
         </div>
+		
         <div id="messages">
         </div>
         <script type="text/javascript"
                 src="/socket.io/socket.io.js"></script>
         <script type="text/javascript"
-                src="http://code.jquery.com/jquery-1.5.2.js"></script>
+                src="http://code.jquery.com/jquery.min.js"></script>
 
         <script type="text/javascript">
             $(document).ready(function() {
@@ -36,7 +41,8 @@
                 });
                 
                 webSocket.on('map', function (message) {
-                    $('#login').replaceWith("<div id='map'>" + message + "</div>");
+                    $('#map').replaceWith("<div id='map'>" + message + "</div>");
+                    
                 })
 
                 $('#nameText').keypress(function(event) {
@@ -44,9 +50,52 @@
                         var message = $('#nameText').val();
                         webSocket.emit('new user', message);
                         $('#nameText').val('');
+						$('#login').hide();
+						$("#messages").show();
                         webSocket.emit('send map');
                     }
+					event.stopPropagation();
                 });
+
+                $('html').keypress(function (event) {
+	                var keycode = (event.keyCode ? event.keyCode : event.which);
+	                var message = "";
+	                switch (keycode) {
+		                case 104:
+		                  message = "-1 0";
+		                  webSocket.emit('move', message);
+		                  break;
+		                case 106:
+		                  message = "0 1";
+		                  webSocket.emit('move', message);
+		                  break;
+		                case 107:
+		                  message = "0 -1";
+		                  webSocket.emit('move', message);
+		                  break;
+		                case 108:
+		                  message = "1 0";
+		                  webSocket.emit('move', message);
+		                  break;
+		                case 121:
+		                  message = "-1 -1";
+		                  webSocket.emit('move', message);
+		                  break;
+		                case 117:
+		                  message = "1 -1";
+		                  webSocket.emit('move', message);
+		                  break;
+		                case 98:
+		                  message = "-1 1";
+		                  webSocket.emit('move', message);
+		                  break;
+		                case 110:
+		                  message = "1 1";
+		                  webSocket.emit('move', message);
+		                  break;
+                    }
+                });
+				$('#login').show();
                 
             });
         </script>

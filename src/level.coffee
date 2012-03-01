@@ -14,11 +14,12 @@ class Level
         tempCopy = []
         tempCopy.push row[0...row.length] for row in data
         for id, player of players
+            console.log id + " " + player + " " + player.getPos()
             whereishe = player.getPos()
             tempCopy[whereishe[1]][whereishe[0]] = "@"
-        map = "--------------------------------------------------------------------------------\n"
-        map += "|" + row.join("") + "|\n" for row in tempCopy
-        map += "--------------------------------------------------------------------------------"
+        map = "---------------------------------------------------------------------------------</br>"
+        map += "|" + row.join("") + "|</br>" for row in tempCopy
+        map += "---------------------------------------------------------------------------------"
         map
 
 module.exports = Level

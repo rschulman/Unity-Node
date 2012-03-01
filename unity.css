@@ -12,16 +12,21 @@ body {
 }
 
 #login {
-    font-family:"Courier New",monospace;
+    display: none;
+	font-family:"Courier New",monospace;
     font-size:1.5em;
     width:1000px;
     height:75%;
     background-color:#000000;
     color:#FFFFFF;
+	position: absolute;
+	left: 0;
+	top: 0;
 }
 
 #messages {
-    width:33%;
+    display: none;
+	width:33%;
     height: 25%;
     border: 1px solid grey;
     color: #FFFFFF;
