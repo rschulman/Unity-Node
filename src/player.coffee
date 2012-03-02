@@ -1,12 +1,15 @@
 class Player
     name = ""
-    level = {}
+    level = 0
     x: 40
     y: 10
     constructor: (@name, @level) ->
 
     getPos: () =>
        [@x, @y]
+
+    getLevel: () =>
+	   @level
 
     move: (vector) =>
        @x += parseInt(vector[0]) if @x + parseInt(vector[0]) >= 0 and @x + parseInt(vector[0]) <= 79

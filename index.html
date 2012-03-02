@@ -20,6 +20,13 @@
         </div>
 		
         <div id="messages">
+			<div>
+				Level Chat:
+			<div id="level">
+			</div>
+			<div>
+				<input type="text" id="levelChat"/>
+			</div>
         </div>
         <script type="text/javascript"
                 src="/socket.io/socket.io.js"></script>
@@ -31,13 +38,8 @@
                 var webSocket = new io.connect();
                 // webSocket.connect();
 
-                webSocket.on('connect', function() {
-                    $('#messages').append('<p>Connected to MMORogue.</p>');
-                });
-
-                webSocket.on('message', function(message) {
-                    console.log(message);
-    	            $('#messages').append('<p>' + message + '</p>');
+                webSocket.on('level chat', function(message) {
+    	            $('#level').append(message + '</br>');
                 });
                 
                 webSocket.on('map', function (message) {
@@ -56,6 +58,16 @@
                     }
 					event.stopPropagation();
                 });
+
+                $('#levelChat').keypress(function(event) {
+                    if (event.which == 13) {
+                        var message = $('#levelChat').val();
+                        webSocket.emit('level chat', message);
+                        $('#levelChat').val('');
+                    }
+					event.stopPropagation();
+                });
+
 
                 $('html').keypress(function (event) {
 	                var keycode = (event.keyCode ? event.keyCode : event.which);

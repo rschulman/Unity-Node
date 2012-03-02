@@ -26,12 +26,18 @@ body {
 
 #messages {
     display: none;
+	margin: 2px;
 	width:33%;
     height: 25%;
     border: 1px solid grey;
     color: #FFFFFF;
-    overflow: hidden auto;
+}
+
+#level {
+	color: #FFFFFF;
+    overflow: auto;
     font-size:.75em;
+	height: 80%;
 }
 
 #floater    {

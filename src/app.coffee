@@ -14,7 +14,7 @@ server = http.createServer (req, res) ->
 
 io = require('socket.io').listen server
 
-server.listen(8080)
+server.listen(8000)
 
 io.sockets.on 'connection', (socket) ->
     
@@ -24,11 +24,13 @@ io.sockets.on 'connection', (socket) ->
         ourState.addPlayer socket.id, newGuy
         ourState.getLevel(0).addPlayer socket.id, newGuy
         io.sockets.emit 'map', ourState.getLevel(0).toString()
+        socket.join 0
         true
 
     socket.on 'level chat', (message) ->
-        userName = ourState.players[socket.id].name
-        io.sockets.in(level).emit 'level chat', userName + message
+        player = ourState.getPlayer(socket.id)
+        level = player.getLevel()
+        io.sockets.in(level).emit 'level chat', player.name+ ": " + message
         true
 
     socket.on 'send map', (message) ->
