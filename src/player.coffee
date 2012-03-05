@@ -9,7 +9,10 @@ class Player
        [@x, @y]
 
     getLevel: () =>
-	   @level
+       @level
+
+    getName: () =>
+       @name
 
     move: (vector) =>
        @x += parseInt(vector[0]) if @x + parseInt(vector[0]) >= 0 and @x + parseInt(vector[0]) <= 79

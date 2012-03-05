@@ -23,7 +23,7 @@ io.sockets.on 'connection', (socket) ->
         newGuy = new Player message, 0
         ourState.addPlayer socket.id, newGuy
         ourState.getLevel(0).addPlayer socket.id, newGuy
-        io.sockets.emit 'map', ourState.getLevel(0).toString()
+        io.sockets.emit 'map', ourState.getLevel(0).povObject()
         socket.join 0
         true
 
@@ -35,11 +35,12 @@ io.sockets.on 'connection', (socket) ->
 
     socket.on 'send map', (message) ->
         where = ourState.getPlayer(socket.id).level
-        socket.emit 'map', ourState.getLevel(where).toString()
+        console.log JSON.stringify ourState.getLevel(where)
+        socket.emit 'map', ourState.getLevel(where).povObject()
         true
 
     socket.on 'move', (message) ->
         where = ourState.getPlayer(socket.id).level
         ourState.getPlayer(socket.id).move(message.split " ")
-        io.sockets.emit 'map', ourState.getLevel(where).toString()
+        io.sockets.emit 'map', ourState.getLevel(where).povObject()
         true
