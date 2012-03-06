@@ -1,14 +1,5 @@
 var constructMap = function (object_data) {
-    var tempCopy = [];
-    for (x = 0; x <= 19; x++) {
-      tempCopy[x] = [];
-    }
-	var col, row;
-	for (col = 0; col <= 79; col++) {
-	  for (row = 0; row <= 19; row++) {
-	    tempCopy[row][col] = ".";
-	  }
-	}
+    var tempCopy = object_data.map;
 
 	var name, player;
 	var players_data = object_data["pcs"];
@@ -35,8 +26,12 @@ $(document).ready(function() {
         $('#level').append(message + '</br>');
     });
     
-    webSocket.on('map', function (message) {
+    webSocket.on('update', function (message) {
         $('#map').replaceWith("<div id='map'>" + constructMap(message) + "</div>");
+    })
+
+    webSocket.on('map', function (message) {
+		
     })
 
     $('#nameText').keypress(function(event) {

@@ -5,7 +5,7 @@ Level = require './level'
 Player = require './player'
 
 clientFiles = new static.Server()
-levels = new Level true
+levels = new Level false
 ourState = new gameState levels
 
 server = http.createServer (req, res) ->
@@ -13,6 +13,7 @@ server = http.createServer (req, res) ->
         clientFiles.serve req, res
 
 io = require('socket.io').listen server
+io.set('log level', 2)
 
 server.listen(8000)
 
@@ -23,7 +24,7 @@ io.sockets.on 'connection', (socket) ->
         newGuy = new Player message, 0
         ourState.addPlayer socket.id, newGuy
         ourState.getLevel(0).addPlayer socket.id, newGuy
-        io.sockets.emit 'map', ourState.getLevel(0).povObject()
+        io.sockets.emit 'update', ourState.getLevel(0).povObject()
         socket.join 0
         true
 
@@ -36,11 +37,11 @@ io.sockets.on 'connection', (socket) ->
     socket.on 'send map', (message) ->
         where = ourState.getPlayer(socket.id).level
         console.log JSON.stringify ourState.getLevel(where)
-        socket.emit 'map', ourState.getLevel(where).povObject()
+        socket.emit 'update', ourState.getLevel(where).povObject()
         true
 
     socket.on 'move', (message) ->
         where = ourState.getPlayer(socket.id).level
         ourState.getPlayer(socket.id).move(message.split " ")
-        io.sockets.emit 'map', ourState.getLevel(where).povObject()
+        io.sockets.emit 'update', ourState.getLevel(where).povObject()
         true

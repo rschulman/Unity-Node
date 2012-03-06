@@ -4,7 +4,7 @@ body {
 
 #map { 
     font-family:"Courier New",monospace;
-    font-size: 1em;
+    font-size: .8em;
     width:1000px;
     height:75%;
     background-color:#000000;
