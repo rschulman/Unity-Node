@@ -30,7 +30,7 @@ io.sockets.on 'connection', (socket) ->
     socket.on 'level chat', (message) ->
         player = ourState.getPlayer(socket.id)
         level = player.getLevel()
-        io.sockets.in(level).emit 'level chat', player.name+ ": " + message
+        io.sockets.in(level).emit 'level chat', player.name + ": " + message
         true
 
     socket.on 'send map', (message) ->
