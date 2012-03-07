@@ -16,14 +16,14 @@ class Level
 
 	digpoint = (x, y) ->
 		data[y][x] = "."
-		data[y+1][x] = "#" if data[y+1][x] == "&nbsp;"
-		data[y-1][x] = "#" if data[y-1][x] == "&nbsp;"
-		data[y][x+1] = "#" if data[y][x+1] == "&nbsp;"
-		data[y][x-1] = "#" if data[y][x-1] == "&nbsp;"
-		data[y+1][x+1] = "#" if data[y+1][x+1] == "&nbsp;"
-		data[y-1][x-1] = "#" if data[y-1][x-1] == "&nbsp;"
-		data[y-1][x+1] = "#" if data[y-1][x+1] == "&nbsp;"
-		data[y+1][x-1] = "#" if data[y+1][x-1] == "&nbsp;"
+		data[y+1][x] = "#" if data[y+1][x] == " "
+		data[y-1][x] = "#" if data[y-1][x] == " "
+		data[y][x+1] = "#" if data[y][x+1] == " "
+		data[y][x-1] = "#" if data[y][x-1] == " "
+		data[y+1][x+1] = "#" if data[y+1][x+1] == " "
+		data[y-1][x-1] = "#" if data[y-1][x-1] == " "
+		data[y-1][x+1] = "#" if data[y-1][x+1] == " "
+		data[y+1][x-1] = "#" if data[y+1][x-1] == " "
 
 	constructor: (is_town) ->
 		if is_town
@@ -34,7 +34,7 @@ class Level
 		else
 			# Time to generate a random level...
 			# Random range = Math.floor(Math.random() * (to-from+1) + from)
-			data[row][col] = "&nbsp;" for row in [0..39] for col in [0..79]
+			data[row][col] = " " for row in [0..39] for col in [0..79]
 			firstroomx = Math.floor(Math.random() * 10) + 5
 			firstroomy = Math.floor(Math.random() * 10) + 5
 			roomw = Math.floor(Math.random() * 10) + 5 # Get a random height and width between 5 and 15
@@ -84,7 +84,7 @@ class Level
 					if starty > 0 and startx > 0 and starty + roomh < 40 and startx + roomw < 80
 						for row in [starty..starty + roomh]
 							for col in [startx..startx + roomw]
-								unless data[row][col] == "&nbsp;"
+								unless data[row][col] == " "
 									valid = false
 									console.log "Failure: Room collision!"
 					else
@@ -141,10 +141,46 @@ class Level
 		JSON.stringify(elements)
 	
 	povObject: (id) ->
+		vision = 8 # How far can a PC see
+		radian = 0
+		subject = players.id
 		elements = 
 			pcs: {}
-		elements.pcs[player.getName()] = [player.x, player.y] for id, player of players
-		elements.map = data
+			terrain:
+				"#":[]
+				".":[]
+				"<":[]
+				">":[]
+				" ":[]
+		if players[id]
+			while radian <= 2 * Math.PI # Walk a circle around the character casting rays to the vision distance. Stop at walls and record what he can see.
+				centerx = players[id].x + .5
+				centery = players[id].y + .5
+				xmove = Math.cos(radian)
+				ymove = Math.sin(radian)
+				wallbug = false
+				for dist in [1..vision]
+					centerx += xmove
+					centery += ymove
+					break if centerx > 79 or centery > 39 or centerx < 0 or centery < 0
+					elements.terrain[data[Math.floor centery][Math.floor centerx]].push([Math.floor(centery), Math.floor(centerx)])
+					for id, checking of players
+						elements.pcs[checking.getName()] = [checking.x, checking.y] if checking.x == Math.floor(centerx) and checking.y == Math.floor(centery)
+					if data[Math.floor centery][Math.floor centerx] == "#" # We found a wall, checking the surrounding walls to see if we're caught on the wall bug
+						nextinrayx = centerx + xmove
+						nextinrayy = centery + ymove
+						if data[Math.floor nextinrayy][Math.floor nextinrayx] == "#" # Next tile the ray would hit is a wall too, so we might be wall bugging
+							directiony = centery - nextinrayy
+							directionx = centerx - nextinrayx
+							wallbug = true if Math.abs(directiony) == 1 and Math.abs(directionx) == 1 # If the ray is going diagonal we can't be wall bugging, right?
+							if Math.abs directiony == 1 # Room should be horizontal to the tile in question
+								wallbug = true if data[Math.floor centery][Math.floor centerx + 1] == "." or data[Math.floor centery][Math.floor centerx - 1] == "."
+							if Math.abs directionx == 1 # Room should be vertical to the tile in question
+								wallbug = true if data[Math.floor centery + 1][Math.floor centerx] == "." or data[Math.floor centery - 1][Math.floor centerx] == "."
+						break unless wallbug
+						wallbug = false
+				radian += .025
+		elements.pcs[players[id].getName()] = [players[id].x, players[id].y] # The player knows his own location, presumeably...
 		elements
 	
 	computeFOV: (loc1, loc2) ->
