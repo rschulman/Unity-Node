@@ -1,22 +1,13 @@
 class Player
-    name = ""
-    level = 0
-    x: 40
-    y: 10
-    constructor: (@name, @level) ->
+	name = ""
+	level = 0
 
-    getPos: () =>
-       [@x, @y]
+	constructor: (@name, @level) ->
 
-    getLevel: () =>
-       @level
+	getLevel: () =>
+		@level
 
-    getName: () =>
-       @name
-
-    move: (vector) =>
-       @x += parseInt(vector[0]) if @x + parseInt(vector[0]) >= 0 and @x + parseInt(vector[0]) <= 79
-       @y += parseInt(vector[1]) if @y + parseInt(vector[1]) >= 0 and @y + parseInt(vector[1]) <= 19
-       true
+	getName: () =>
+		@name
 
 module.exports = Player

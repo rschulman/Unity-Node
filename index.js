@@ -27,6 +27,7 @@ $(document).ready(function() {
     });
     
     webSocket.on('update', function (message) {
+		console.log(message);
         $('#map').replaceWith("<div id='map'>" + constructMap(message) + "</div>");
     })
 

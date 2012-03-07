@@ -42,6 +42,6 @@ io.sockets.on 'connection', (socket) ->
 
     socket.on 'move', (message) ->
         where = ourState.getPlayer(socket.id).level
-        ourState.getPlayer(socket.id).move(message.split " ")
+        ourState.getLevel(where).movePlayer(socket.id, message.split " ")
         io.sockets.emit 'update', ourState.getLevel(where).povObject()
         true

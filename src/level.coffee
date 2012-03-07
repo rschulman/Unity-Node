@@ -2,6 +2,10 @@ class Level
 	data = []
 	data[x] = [] for x in [0..39]
 	players = {}
+	downy = 0
+	downx = 0
+	upy = 0
+	upx = 0
 
 	digroom = (x, y, w, h) ->
 		data[y-1][col] = "#" for col in [x-1..x+w]
@@ -39,7 +43,7 @@ class Level
 			room_track = []
 			room_track.push [firstroomx, firstroomy, roomh, roomw]
 			# Now push rooms off of the origin room.
-			for rooms in [1..5]
+			for rooms in [1..9]
 				valid = false
 				until valid
 					console.log "Trying..."
@@ -96,6 +100,8 @@ class Level
 			until donedown
 				if data[stairrow][staircol] == "."
 					data[stairrow][staircol] = ">"
+					downy = stairrow
+					downx = staircol
 					donedown = true
 				stairrow = Math.floor Math.random() * 40
 				staircol = Math.floor Math.random() * 80
@@ -104,12 +110,28 @@ class Level
 			until doneup
 				if data[stairrow][staircol] == "."
 					data[stairrow][staircol] = "<"
+					upy = stairrow
+					upx = staircol
 					doneup = true
 				stairrow = Math.floor Math.random() * 40
 				staircol = Math.floor Math.random() * 80
 	
 	addPlayer: (id, player) ->
+		player.x = upx
+		player.y = upy
 		players[id] = player
+		
+	movePlayer: (socketid, vector) ->
+		subject = players[socketid]
+		currentx = subject.x
+		currenty = subject.y
+		if currentx + parseInt(vector[0]) < 0 or currentx + parseInt(vector[0]) > 79 then return false
+		if currenty + parseInt(vector[1]) < 0 or currenty + parseInt(vector[1]) > 39 then return false
+		if data[currenty + parseInt(vector[1])][currentx + parseInt(vector[0])] not in [".","<",">"] then return false
+		subject.x += parseInt(vector[0])
+		subject.y += parseInt(vector[1])
+		true
+
 	
 	toJSON: (id) ->
 		# For now the only thing to return is the PCs and positions.
@@ -121,7 +143,7 @@ class Level
 	povObject: (id) ->
 		elements = 
 			pcs: {}
-		elements.pcs[player.getName()] = player.getPos() for id, player of players
+		elements.pcs[player.getName()] = [player.x, player.y] for id, player of players
 		elements.map = data
 		elements
 	
