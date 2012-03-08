@@ -143,7 +143,7 @@ class Level
 	povObject: (id) ->
 		vision = 8 # How far can a PC see
 		radian = 0
-		subject = players.id
+		subject = players[id]
 		elements = 
 			pcs: {}
 			terrain:
@@ -163,8 +163,8 @@ class Level
 					centerx += xmove
 					centery += ymove
 					break if centerx > 79 or centery > 39 or centerx < 0 or centery < 0
-					elements.terrain[data[Math.floor centery][Math.floor centerx]].push([Math.floor(centery), Math.floor(centerx)])
-					for id, checking of players
+					elements.terrain[data[Math.floor centery][Math.floor centerx]].push([Math.floor(centery), Math.floor(centerx)]) # TODO: Fix this, pushes way too much data to the array.
+					for throwaway, checking of players
 						elements.pcs[checking.getName()] = [checking.x, checking.y] if checking.x == Math.floor(centerx) and checking.y == Math.floor(centery)
 					if data[Math.floor centery][Math.floor centerx] == "#" # We found a wall, checking the surrounding walls to see if we're caught on the wall bug
 						nextinrayx = centerx + xmove
@@ -182,10 +182,6 @@ class Level
 				radian += .025
 		elements.pcs[players[id].getName()] = [players[id].x, players[id].y] # The player knows his own location, presumeably...
 		elements
-	
-	computeFOV: (loc1, loc2) ->
-		#  ToDo: Implement ray FOV solution
-		true
-	
+
 
 module.exports = Level
