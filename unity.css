@@ -3,59 +3,68 @@ body {
 }
 
 #map { 
-    font-family:"Courier New",monospace;
-    font-size: .8em;
-    width:1000px;
-    height:75%;
-    background-color:#000000;
-    color:#FFFFFF;
+    font-family:		"Courier New",monospace;
+    font-size: 			.8em;
+    width:				75%;
+    height:				33%;
+    background-color:	#000000;
+    color:				#FFFFFF;
+}
+#info {
+	font-family:		"Courier New",monospace;
+    font-size: 			.8em;
+    width: 				25%;
+    height: 			75%;
+    border: 			1px solid gray;
+    background-color:	#000000;
+    color:				#FFFFFF;
 }
 
 #login {
-    display: none;
-	font-family:"Courier New",monospace;
-    font-size:1.5em;
-    width:1000px;
-    height:75%;
-    background-color:#000000;
-    color:#FFFFFF;
-	position: absolute;
-	left: 0;
-	top: 0;
+    display: 			none;
+	font-family:		"Courier New",monospace;
+    font-size:			1.5em;
+    width:				1000px;
+    height:				75%;
+    background-color:	#000000;
+    color:				#FFFFFF;
+	position:			absolute;
+	left: 				0;
+	top: 				0;
 }
 
 #messages {
-    display: none;
-	margin: 2px;
-	width:33%;
-    height: 25%;
-    border: 1px solid grey;
-    color: #FFFFFF;
+    display: 			none;
+	margin: 			2px;
+	width:				33%;
+    height: 			25%;
+    border: 			1px solid gray;
+    color: 				#FFFFFF;
 }
 
 #level {
-	color: #FFFFFF;
-    overflow: auto;
-    font-size:.75em;
-	height: 80%;
+	color: 				#FFFFFF;
+    overflow: 			auto;
+    font-size:			.75em;
+	height: 			80%;
 }
 
 #floater    {
-    float:left; 
-    height:50%; 
-    margin-bottom:-20px;
+    float:				left; 
+    height:				50%; 
+    margin-bottom:		-20px;
 }
 
 #content	{
-    clear:both; 
-    height:240px; 
-    position:relative;
+    clear:				both; 
+    height:				240px; 
+    position:			relative;
 }
 
 .visible {
-	color: white;
+	color: 				white;
 }
 
 .remembered {
-	color: #ABABAB;
+	color: 				#ABABAB;
 }
