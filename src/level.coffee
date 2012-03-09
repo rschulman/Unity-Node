@@ -1,11 +1,16 @@
 class Level
+	MAXROWS = 999
+	MAXCOLS = 999
 	data = []
-	data[x] = [] for x in [0..39]
+	data[x] = [] for x in [0..MAXROWS]
 	players = {}
 	downy = 0
 	downx = 0
 	upy = 0
 	upx = 0
+
+	arrays_equal = (a, b) ->
+		not (a < b or b < a)
 
 	digroom = (x, y, w, h) ->
 		data[y-1][col] = "#" for col in [x-1..x+w]
@@ -27,14 +32,14 @@ class Level
 
 	constructor: (is_town) ->
 		if is_town
-			data[row][col] = "." for row in [0..39] for col in [0..79]
+			data[row][col] = "." for row in [0..MAXROWS] for col in [0..MAXCOLS]
 			stairrow = Math.floor Math.random() * 40
 			staircol = Math.floor Math.random() * 80
 			data[stairrow][staircol] = ">"
 		else
 			# Time to generate a random level...
 			# Random range = Math.floor(Math.random() * (to-from+1) + from)
-			data[row][col] = " " for row in [0..39] for col in [0..79]
+			data[row][col] = " " for row in [0..MAXROWS] for col in [0..MAXROWS]
 			firstroomx = Math.floor(Math.random() * 10) + 5
 			firstroomy = Math.floor(Math.random() * 10) + 5
 			roomw = Math.floor(Math.random() * 10) + 5 # Get a random height and width between 5 and 15
@@ -43,78 +48,87 @@ class Level
 			room_track = []
 			room_track.push [firstroomx, firstroomy, roomh, roomw]
 			# Now push rooms off of the origin room.
-			for rooms in [1..9]
+			for rooms in [1..24]
 				valid = false
 				until valid
 					console.log "Trying..."
 					workingroom = Math.floor(Math.random() * room_track.length) # Pick a room from the existing rooms at random.
 					roomw = Math.floor(Math.random() * 10) + 5 # Get a random height and width between 5 and 15
 					roomh = Math.floor(Math.random() * 10) + 5
+					exitdigs = []
+					exitlength = Math.floor(Math.random() * 4) + 7
 					# rand 1-4 for side of room then rand size of that wall for entrance.
 					switch (Math.floor Math.random() * 4) + 1
 						when 1
 							exitx = (Math.floor Math.random() * room_track[workingroom][3]) + room_track[workingroom][0] # Pick a spot on the north wall
 							exity = room_track[workingroom][1] - 1
 							startx = exitx - (Math.floor Math.random() * roomw)
-							starty = exity - roomh - 2
-							exitdigs = [[exitx, exity], [exitx, exity-1], [exitx, exity-2]]
+							starty = exity - roomh - exitlength - 1
+							# exitdigs = [[exitx, exity], [exitx, exity-1], [exitx, exity-2]]
+							exitdigs.push [exitx, exity - iter] for iter in [0..exitlength+1]
 							console.log "North: " + startx + ", " + starty + " " + roomw + " x " + roomh
 						when 2
 							exitx = room_track[workingroom][0] + room_track[workingroom][3] # Pick a spot on the east wall
 							exity = (Math.floor Math.random() * room_track[workingroom][2]) + room_track[workingroom][1]
-							startx = exitx + 3
+							startx = exitx + exitlength
 							starty = exity - (Math.floor Math.random() * roomh)
-							exitdigs = [[exitx, exity], [exitx+1, exity], [exitx+2, exity]]
+							# exitdigs = [[exitx, exity], [exitx+1, exity], [exitx+2, exity]]
+							exitdigs.push [exitx + iter, exity] for iter in [0..exitlength+1]
 							console.log "East: " + startx + ", " + starty + " " + roomw + " x " + roomh
 						when 3
 							exitx = (Math.floor Math.random() * room_track[workingroom][3]) + room_track[workingroom][0] # Pick a spot on the south wall
 							exity = room_track[workingroom][1] + room_track[workingroom][2]
 							startx = exitx - (Math.floor Math.random() * roomw)
-							starty = exity + 3
-							exitdigs = [[exitx, exity], [exitx, exity+1], [exitx, exity+2]]
+							starty = exity + exitlength
+							# exitdigs = [[exitx, exity], [exitx, exity+1], [exitx, exity+2]]
+							exitdigs.push [exitx, exity + iter] for iter in [0..exitlength+1]
 							console.log "South: " + startx + ", " + starty + " " + roomw + " x " + roomh
 						when 4
 							exitx = room_track[workingroom][0] - 1# Pick a spot on the west wall
 							exity = (Math.floor Math.random() * room_track[workingroom][3]) + room_track[workingroom][1]
-							startx = exitx - roomw - 2
+							startx = exitx - roomw - exitlength - 1
 							starty = exity - (Math.floor Math.random() * roomh)
-							exitdigs = [[exitx, exity], [exitx-1, exity], [exitx-2, exity]]
+							# exitdigs = [[exitx, exity], [exitx-1, exity], [exitx-2, exity]]
+							exitdigs.push [exitx - iter, exity] for iter in [0..exitlength+1]
 							console.log "West: " + startx + ", " + starty + " " + roomw + " x " + roomh
 					valid = true
-					if starty > 0 and startx > 0 and starty + roomh < 40 and startx + roomw < 80
+					if starty > 0 and startx > 0 and starty + roomh <= MAXROWS and startx + roomw <= MAXCOLS
 						for row in [starty..starty + roomh]
 							for col in [startx..startx + roomw]
 								unless data[row][col] == " "
 									valid = false
+									row = starty+roomh+1
+									col = startx+roomw+1
 									console.log "Failure: Room collision!"
 					else
 						valid = false
 						console.log "Failure: Room out of bounds!"
 				digroom startx, starty, roomw, roomh
-				digpoint exitdigs[0][0], exitdigs[0][1]
-				digpoint exitdigs[1][0], exitdigs[1][1]
-				digpoint exitdigs[2][0], exitdigs[2][1]
+				# digpoint exitdigs[0][0], exitdigs[0][1]
+				# digpoint exitdigs[1][0], exitdigs[1][1]
+				# digpoint exitdigs[2][0], exitdigs[2][1]
+				digpoint thispoint[0], thispoint[1] for thispoint in exitdigs
 				room_track.push [startx, starty, roomh, roomw]
-			stairrow = Math.floor Math.random() * 40
-			staircol = Math.floor Math.random() * 80
+			stairrow = Math.floor Math.random() * MAXROWS
+			staircol = Math.floor Math.random() * MAXCOLS
 			until donedown
 				if data[stairrow][staircol] == "."
 					data[stairrow][staircol] = ">"
 					downy = stairrow
 					downx = staircol
 					donedown = true
-				stairrow = Math.floor Math.random() * 40
-				staircol = Math.floor Math.random() * 80
-			stairrow = Math.floor Math.random() * 40
-			staircol = Math.floor Math.random() * 80
+				stairrow = Math.floor Math.random() * MAXROWS
+				staircol = Math.floor Math.random() * MAXCOLS
+			stairrow = Math.floor Math.random() * MAXROWS
+			staircol = Math.floor Math.random() * MAXCOLS
 			until doneup
 				if data[stairrow][staircol] == "."
 					data[stairrow][staircol] = "<"
 					upy = stairrow
 					upx = staircol
 					doneup = true
-				stairrow = Math.floor Math.random() * 40
-				staircol = Math.floor Math.random() * 80
+				stairrow = Math.floor Math.random() * MAXROWS
+				staircol = Math.floor Math.random() * MAXCOLS
 	
 	addPlayer: (id, player) ->
 		player.x = upx
@@ -125,8 +139,8 @@ class Level
 		subject = players[socketid]
 		currentx = subject.x
 		currenty = subject.y
-		if currentx + parseInt(vector[0]) < 0 or currentx + parseInt(vector[0]) > 79 then return false
-		if currenty + parseInt(vector[1]) < 0 or currenty + parseInt(vector[1]) > 39 then return false
+		if currentx + parseInt(vector[0]) < 0 or currentx + parseInt(vector[0]) > MAXROWS then return false
+		if currenty + parseInt(vector[1]) < 0 or currenty + parseInt(vector[1]) > MAXCOLS then return false
 		if data[currenty + parseInt(vector[1])][currentx + parseInt(vector[0])] not in [".","<",">"] then return false
 		subject.x += parseInt(vector[0])
 		subject.y += parseInt(vector[1])
@@ -162,8 +176,9 @@ class Level
 				for dist in [1..vision]
 					centerx += xmove
 					centery += ymove
-					break if centerx > 79 or centery > 39 or centerx < 0 or centery < 0
-					elements.terrain[data[Math.floor centery][Math.floor centerx]].push([Math.floor(centery), Math.floor(centerx)]) # TODO: Fix this, pushes way too much data to the array.
+					break if centerx > MAXCOLS or centery > MAXCOLS or centerx < 0 or centery < 0
+					presensecheck = (arrays_equal item, [Math.floor(centery), Math.floor(centerx)] for item in elements.terrain[data[Math.floor centery][Math.floor centerx]])
+					elements.terrain[data[Math.floor centery][Math.floor centerx]].push([Math.floor(centery), Math.floor(centerx)]) if presensecheck.indexOf(true) == -1
 					for throwaway, checking of players
 						elements.pcs[checking.getName()] = [checking.x, checking.y] if checking.x == Math.floor(centerx) and checking.y == Math.floor(centery)
 					if data[Math.floor centery][Math.floor centerx] == "#" # We found a wall, checking the surrounding walls to see if we're caught on the wall bug
@@ -180,7 +195,7 @@ class Level
 						break unless wallbug
 						wallbug = false
 				radian += .025
-		elements.pcs[players[id].getName()] = [players[id].x, players[id].y] # The player knows his own location, presumeably...
+		elements.you = [players[id].x, players[id].y] # The player knows his own location, presumeably...
 		elements
 
 

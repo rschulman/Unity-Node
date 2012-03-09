@@ -1,6 +1,7 @@
 var constructMap = function (object_data, tempCopy) {
 	var key, location, _ref;
-
+	var WINDOW = 40;
+	
 	_ref = object_data.terrain;
 	for (key in _ref) {
 		location = _ref[key];
@@ -22,14 +23,30 @@ var constructMap = function (object_data, tempCopy) {
 	  tempCopy[player[1]][player[0]].tile = "@";
 	  tempCopy[player[1]][player[0]].visibile = true;
 	  tempCopy[player[1]][player[0]].remembered = true;
-
 	}
 	
-    map = "----------------------------------------------------------------------------------</br>";
-    for (_j = 0, _len2 = tempCopy.length; _j < _len2; _j++) {
+	centerx = object_data.you[0]
+	centery = object_data.you[1]
+	tempCopy[centery][centerx].tile = "@"
+	tempCopy[centery][centerx].visible = true
+	tempCopy[centery][centerx].remembered = false
+	
+	if (centerx < WINDOW/2) {
+		centerx = WINDOW/2;
+	}
+	if (centery < WINDOW/2) {
+		centery = WINDOW/2;
+	}
+	if (centerx > 1000 - WINDOW/2) {
+		centerx = 1000 - WINDOW/2;
+	}
+	if (centery > 1000 - WINDOW/2) {
+		centery = 1000 - WINDOW/2;
+	}
+	map = "";
+    for (_j = centery - WINDOW/2, _len2 = centery + WINDOW/2; _j < _len2; _j++) {
       row = tempCopy[_j];
-      map += "|"
-      for (_x = 0, _len3 = row.length; _x < _len3; _x++) {
+      for (_x = centerx - WINDOW/2, _len3 = centerx + WINDOW/2; _x < _len3; _x++) {
         if (row[_x].visible) {
           map += "<span class='visible'>" + row[_x].tile + "</span>";
         }
@@ -40,9 +57,8 @@ var constructMap = function (object_data, tempCopy) {
 	      map += row[_x].tile;
         }
       }
-      map += "|</br>";
+      map += "</br>";
     }
-    map += "----------------------------------------------------------------------------------";
 
 	var col, row, _i, _j, _len, _len2;
 
@@ -58,10 +74,10 @@ var constructMap = function (object_data, tempCopy) {
 
 $(document).ready(function() {
 	var tempCopy = [];
-	for (var row = 0; row <= 39; row++)
+	for (var row = 0; row <= 999; row++)
 		tempCopy[row] = []
-	for (var col = 0; col <= 79; col++) {
-	  for (var row = 0; row <= 39; row++) {
+	for (var col = 0; col <= 999; col++) {
+	  for (var row = 0; row <= 999; row++) {
 	    tempCopy[row][col] = {
 		  tile: "&nbsp;",
 		  visible: false,
@@ -71,10 +87,10 @@ $(document).ready(function() {
 	}
 	
     var webSocket = new io.connect();
-    // webSocket.connect();
 
     webSocket.on('level chat', function(message) {
         $('#level').append(message + '</br>');
+        $("#level").scrollTop($("#level")[0].scrollHeight);
     });
     
     webSocket.on('update', function (message) {
