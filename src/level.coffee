@@ -13,29 +13,29 @@ class Level
 		not (a < b or b < a)
 
 	digroom = (x, y, w, h) ->
-		data[y-1][col] = "#" for col in [x-1..x+w]
-		data[y+h][col] = "#" for col in [x-1..x+w]
-		data[row][x-1] = "#" for row in [y-1..y+h]
-		data[row][x+w] = "#" for row in [y-1..y+h]
-		data[row][col] = "." for col in [x..x+w - 1] for row in [y..y+h - 1]
+		data[y-1][col] = "wall" for col in [x-1..x+w]
+		data[y+h][col] = "wall" for col in [x-1..x+w]
+		data[row][x-1] = "wall" for row in [y-1..y+h]
+		data[row][x+w] = "wall" for row in [y-1..y+h]
+		data[row][col] = "floor" for col in [x..x+w - 1] for row in [y..y+h - 1]
 
 	digpoint = (x, y) ->
-		data[y][x] = "."
-		data[y+1][x] = "#" if data[y+1][x] == " "
-		data[y-1][x] = "#" if data[y-1][x] == " "
-		data[y][x+1] = "#" if data[y][x+1] == " "
-		data[y][x-1] = "#" if data[y][x-1] == " "
-		data[y+1][x+1] = "#" if data[y+1][x+1] == " "
-		data[y-1][x-1] = "#" if data[y-1][x-1] == " "
-		data[y-1][x+1] = "#" if data[y-1][x+1] == " "
-		data[y+1][x-1] = "#" if data[y+1][x-1] == " "
+		data[y][x] = "floor"
+		data[y+1][x] = "wall" if data[y+1][x] == " "
+		data[y-1][x] = "wall" if data[y-1][x] == " "
+		data[y][x+1] = "wall" if data[y][x+1] == " "
+		data[y][x-1] = "wall" if data[y][x-1] == " "
+		data[y+1][x+1] = "wall" if data[y+1][x+1] == " "
+		data[y-1][x-1] = "wall" if data[y-1][x-1] == " "
+		data[y-1][x+1] = "wall" if data[y-1][x+1] == " "
+		data[y+1][x-1] = "wall" if data[y+1][x-1] == " "
 
 	constructor: (is_town) ->
 		if is_town
-			data[row][col] = "." for row in [0..MAXROWS] for col in [0..MAXCOLS]
+			data[row][col] = "floor" for row in [0..MAXROWS] for col in [0..MAXCOLS]
 			stairrow = Math.floor Math.random() * 40
 			staircol = Math.floor Math.random() * 80
-			data[stairrow][staircol] = ">"
+			data[stairrow][staircol] = "downstair"
 		else
 			# Time to generate a random level...
 			# Random range = Math.floor(Math.random() * (to-from+1) + from)
@@ -112,8 +112,8 @@ class Level
 			stairrow = Math.floor Math.random() * MAXROWS
 			staircol = Math.floor Math.random() * MAXCOLS
 			until donedown
-				if data[stairrow][staircol] == "."
-					data[stairrow][staircol] = ">"
+				if data[stairrow][staircol] == "floor"
+					data[stairrow][staircol] = "downstair"
 					downy = stairrow
 					downx = staircol
 					donedown = true
@@ -122,8 +122,8 @@ class Level
 			stairrow = Math.floor Math.random() * MAXROWS
 			staircol = Math.floor Math.random() * MAXCOLS
 			until doneup
-				if data[stairrow][staircol] == "."
-					data[stairrow][staircol] = "<"
+				if data[stairrow][staircol] == "floor"
+					data[stairrow][staircol] = "upstair"
 					upy = stairrow
 					upx = staircol
 					doneup = true
@@ -141,7 +141,7 @@ class Level
 		currenty = subject.y
 		if currentx + parseInt(vector[0]) < 0 or currentx + parseInt(vector[0]) > MAXROWS then return false
 		if currenty + parseInt(vector[1]) < 0 or currenty + parseInt(vector[1]) > MAXCOLS then return false
-		if data[currenty + parseInt(vector[1])][currentx + parseInt(vector[0])] not in [".","<",">"] then return false
+		if data[currenty + parseInt(vector[1])][currentx + parseInt(vector[0])] not in ["floor","upstair","downstair"] then return false
 		subject.x += parseInt(vector[0])
 		subject.y += parseInt(vector[1])
 		true
@@ -161,10 +161,10 @@ class Level
 		elements = 
 			pcs: {}
 			terrain:
-				"#":[]
-				".":[]
-				"<":[]
-				">":[]
+				"wall":[]
+				"floor":[]
+				"upstair":[]
+				"downstair":[]
 				" ":[]
 		if players[id]
 			while radian <= 2 * Math.PI # Walk a circle around the character casting rays to the vision distance. Stop at walls and record what he can see.
@@ -179,19 +179,19 @@ class Level
 					break if centerx > MAXCOLS or centery > MAXCOLS or centerx < 0 or centery < 0
 					presensecheck = (arrays_equal item, [Math.floor(centery), Math.floor(centerx)] for item in elements.terrain[data[Math.floor centery][Math.floor centerx]])
 					elements.terrain[data[Math.floor centery][Math.floor centerx]].push([Math.floor(centery), Math.floor(centerx)]) if presensecheck.indexOf(true) == -1
-					for throwaway, checking of players
-						elements.pcs[checking.getName()] = [checking.x, checking.y] if checking.x == Math.floor(centerx) and checking.y == Math.floor(centery)
-					if data[Math.floor centery][Math.floor centerx] == "#" # We found a wall, checking the surrounding walls to see if we're caught on the wall bug
+					for id, checking of players
+						elements.pcs[checking.getName()] = [checking.x, checking.y, id] if checking.x == Math.floor(centerx) and checking.y == Math.floor(centery)
+					if data[Math.floor centery][Math.floor centerx] == "wall" # We found a wall, checking the surrounding walls to see if we're caught on the wall bug
 						nextinrayx = centerx + xmove
 						nextinrayy = centery + ymove
-						if data[Math.floor nextinrayy][Math.floor nextinrayx] == "#" # Next tile the ray would hit is a wall too, so we might be wall bugging
+						if data[Math.floor nextinrayy][Math.floor nextinrayx] == "wall" # Next tile the ray would hit is a wall too, so we might be wall bugging
 							directiony = centery - nextinrayy
 							directionx = centerx - nextinrayx
 							wallbug = true if Math.abs(directiony) == 1 and Math.abs(directionx) == 1 # If the ray is going diagonal we can't be wall bugging, right?
 							if Math.abs directiony == 1 # Room should be horizontal to the tile in question
-								wallbug = true if data[Math.floor centery][Math.floor centerx + 1] == "." or data[Math.floor centery][Math.floor centerx - 1] == "."
+								wallbug = true if data[Math.floor centery][Math.floor centerx + 1] == "floor" or data[Math.floor centery][Math.floor centerx - 1] == "floor"
 							if Math.abs directionx == 1 # Room should be vertical to the tile in question
-								wallbug = true if data[Math.floor centery + 1][Math.floor centerx] == "." or data[Math.floor centery - 1][Math.floor centerx] == "."
+								wallbug = true if data[Math.floor centery + 1][Math.floor centerx] == "floor" or data[Math.floor centery - 1][Math.floor centerx] == "floor"
 						break unless wallbug
 						wallbug = false
 				radian += .025
