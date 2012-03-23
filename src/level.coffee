@@ -179,8 +179,8 @@ class Level
 					break if centerx > MAXCOLS or centery > MAXCOLS or centerx < 0 or centery < 0
 					presensecheck = (arrays_equal item, [Math.floor(centery), Math.floor(centerx)] for item in elements.terrain[data[Math.floor centery][Math.floor centerx]])
 					elements.terrain[data[Math.floor centery][Math.floor centerx]].push([Math.floor(centery), Math.floor(centerx)]) if presensecheck.indexOf(true) == -1
-					for id, checking of players
-						elements.pcs[checking.getName()] = [checking.x, checking.y, id] if checking.x == Math.floor(centerx) and checking.y == Math.floor(centery)
+					for targetid, checking of players
+						elements.pcs[checking.getName()] = [checking.x, checking.y, targetid] if checking.x == Math.floor(centerx) and checking.y == Math.floor(centery)
 					if data[Math.floor centery][Math.floor centerx] == "wall" # We found a wall, checking the surrounding walls to see if we're caught on the wall bug
 						nextinrayx = centerx + xmove
 						nextinrayy = centery + ymove
@@ -195,7 +195,7 @@ class Level
 						break unless wallbug
 						wallbug = false
 				radian += .025
-		elements.you = [players[id].x, players[id].y] # The player knows his own location, presumeably...
+		elements.you = [subject.x, subject.y] # The player knows his own location, presumeably...
 		elements
 
 
