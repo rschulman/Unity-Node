@@ -3,6 +3,9 @@ static = require 'node-static'
 gameState = require './gameState'
 Level = require './level'
 Player = require './player'
+Db = require 'mongodb'.Db
+Connection = require 'mongodb'.Connection
+dbServer = require 'mongodb'.Server
 
 clientFiles = new static.Server()
 levels = new Level false
@@ -18,10 +21,20 @@ io.set('close timeout', 60*60*24)
 
 server.listen(8000)
 
+db = new Db('unityrl', new dbServer(localhost, Connection.DEFAULT_PORT, {}), {native_parser: true});
+db.open (err, db) ->
+    if err
+        console.log err
+
 io.sockets.on 'connection', (socket) ->
     
     socket.on 'new user', (message) ->
         # Going to have to figure out what to do with new users...
+        db.find {name: message}, (err, cursor) ->
+          if cursor.count = 1
+            # Create a new player object from the db...
+        
+        
         newGuy = new Player message, 0
         ourState.addPlayer socket.id, newGuy
         ourState.getLevel(0).addPlayer socket.id, newGuy
