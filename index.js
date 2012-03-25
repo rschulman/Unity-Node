@@ -20,14 +20,18 @@ var constructMap = function (object_data, tempCopy) {
 	var players_data = object_data["pcs"];
 	for (name in object_data["pcs"]) {
 	  player = players_data[name];
-	  tempCopy[player[1]][player[0]].tile = "@";
+	  tempCopy[player[1]][player[0]].tile = "floor";
+	  tempCopy[player[1]][player[0]].contents = "player";
+	  tempCopy[player[1]][player[0]].id = player.id;
 	  tempCopy[player[1]][player[0]].visibile = true;
 	  tempCopy[player[1]][player[0]].remembered = true;
 	}
 	
 	centerx = object_data.you[0]
 	centery = object_data.you[1]
-	tempCopy[centery][centerx].tile = "@"
+	tempCopy[centery][centerx].tile = "floor"
+	tempCopy[centery][centerx].contents = "player";
+	tempCopy[centery][centerx].id = 0;
 	tempCopy[centery][centerx].visible = true
 	tempCopy[centery][centerx].remembered = false
 	
@@ -43,21 +47,45 @@ var constructMap = function (object_data, tempCopy) {
 	if (centery > 1000 - WINDOW/2) {
 		centery = 1000 - WINDOW/2;
 	}
-	map = "";
-    for (_j = centery - WINDOW/2, _len2 = centery + WINDOW/2; _j < _len2; _j++) {
+	$("#map").empty();
+	var tilecounter = 0;
+	for (_j = centery - WINDOW/2, _len2 = centery + WINDOW/2; _j < _len2; _j++) {
       row = tempCopy[_j];
       for (_x = centerx - WINDOW/2, _len3 = centerx + WINDOW/2; _x < _len3; _x++) {
         if (row[_x].visible) {
-          map += "<span class='visible'>" + row[_x].tile + "</span>";
+          var divbuild = '<div class="tile visible ';
+		  if (row[_x].contents == "player") {
+            divbuild += row[_x].id;
+          }
+          divbuild += " " + row[_x].tile + '" style="top: ' + Math.floor(tilecounter/40) * 16 + '; left: ' + (tilecounter % 40) * 16 + ';">';
+          if (row[_x].contents == "player") {
+		    divbuild += "@";
+		  }
+		  if (row[_x].tile == "upstair") {
+		    divbuild += "<";
+		  }
+		  if (row[_x].tile == "downstair") {
+		    divbuild += ">";
+		  }
+		  divbuild += "</div>";
+          $("#map").append(divbuild);
         }
         else if (row[_x].remembered) {
-          map += "<span class='remembered'>" + row[_x].tile + "</span>";
-        }
-        else {
-	      map += row[_x].tile;
-        }
+	          var divbuild = '<div class="tile remembered ' + row[_x].tile + '" style="top: ' + Math.floor(tilecounter/40) * 16 + '; left: ' + (tilecounter % 40) * 16 + ';">';
+	          if (row[_x].tile == "player") {
+			    divbuild += "@";
+			  }
+			  if (row[_x].tile == "upstair") {
+			    divbuild += "<";
+			  }
+			  if (row[_x].tile == "downstair") {
+			    divbuild += ">";
+			  }
+			  divbuild += "</div>";
+	          $("#map").append(divbuild);
+	    }
+		tilecounter++;
       }
-      map += "</br>";
     }
 
 	var col, row, _i, _j, _len, _len2;
@@ -66,10 +94,10 @@ var constructMap = function (object_data, tempCopy) {
 	  row = tempCopy[_i];
 	  for (_j = 0, _len2 = row.length; _j < _len2; _j++) {
 		row[_j].visible = false;
+		row[_j].contents = "";
 	  }
 	}
-
-    return map;
+	return true;
 }
 
 $(document).ready(function() {
@@ -95,7 +123,7 @@ $(document).ready(function() {
     
     webSocket.on('update', function (message) {
 		console.log(message);
-        $('#map').replaceWith("<div id='map'>" + constructMap(message, tempCopy) + "</div>");
+        constructMap(message, tempCopy);
     })
 
     webSocket.on('map', function (message) {
@@ -123,6 +151,34 @@ $(document).ready(function() {
     });
 
 
+	$("#map").on("click", ".tile", function (event) {
+		var infotext = "<p>A ";
+		var $target = $(event.target);
+		if ($target.hasClass("visible")) {
+			infotext += "visible ";
+		}
+		else if ($target.hasClass("remembered")) {
+			infotext += "remembered ";
+		}
+		if ($target.hasClass("upstair")) {
+			infotext += "up stair. ";
+		}
+		else if ($target.hasClass("downstair")) {
+			infotext += "down stair.";
+		}
+		else if ($target.hasClass("floor")) {
+			infotext += "floor.";
+		}
+		else if ($target.hasClass("wall")) {
+			infotext += "wall.";
+		}
+		infotext += "</p><p>Contents:</p>"
+		
+		$("#info").html(infotext);
+		$(".clicked").toggleClass("clicked");
+		$target.addClass("clicked");
+	});
+	
     $('html').keypress(function (event) {
         var keycode = (event.keyCode ? event.keyCode : event.which);
         var message = "";

@@ -3,59 +3,95 @@ body {
 }
 
 #map { 
-    font-family:"Courier New",monospace;
-    font-size: .8em;
-    width:1000px;
-    height:75%;
-    background-color:#000000;
-    color:#FFFFFF;
+    font-family:		"Courier New",monospace;
+    font-size: 			.8em;
+    width:				642px;
+    height:				642px;
+    background-color:	#000000;
+    color:				#FFFFFF;
+}
+#info {
+	font-family:		"Courier New",monospace;
+    font-size: 			.8em;
+    width: 				200px;
+    height: 			321px;
+    border: 			1px solid gray;
+    background-color:	#000000;
+    color:				#FFFFFF;
+	position:			absolute;
+	top:				1;
+	left:				643;
 }
 
 #login {
-    display: none;
-	font-family:"Courier New",monospace;
-    font-size:1.5em;
-    width:1000px;
-    height:75%;
-    background-color:#000000;
-    color:#FFFFFF;
-	position: absolute;
-	left: 0;
-	top: 0;
+    display: 			none;
+	font-family:		"Courier New",monospace;
+    font-size:			1.5em;
+    width:				1000px;
+    height:				75%;
+    background-color:	#000000;
+    color:				#FFFFFF;
+	position:			absolute;
+	left: 				0;
+	top: 				0;
 }
 
 #messages {
-    display: none;
-	margin: 2px;
-	width:33%;
-    height: 25%;
-    border: 1px solid grey;
-    color: #FFFFFF;
+    display: 			none;
+	margin: 			2px;
+	width:				33%;
+    height: 			25%;
+    border: 			1px solid gray;
+    color: 				#FFFFFF;
 }
 
 #level {
-	color: #FFFFFF;
-    overflow: auto;
-    font-size:.75em;
-	height: 80%;
+	color: 				#FFFFFF;
+    overflow: 			auto;
+    font-size:			.75em;
+	height: 			80%;
 }
 
 #floater    {
-    float:left; 
-    height:50%; 
-    margin-bottom:-20px;
+    float:				left; 
+    height:				50%; 
+    margin-bottom:		-20px;
 }
 
 #content	{
-    clear:both; 
-    height:240px; 
-    position:relative;
+    clear:				both; 
+    height:				240px; 
+    position:			relative;
 }
 
-.visible {
-	color: white;
+.tile {
+	display: 			inline-block;
+	width: 				15px;
+	height: 			15px;
+	background-color:	white;
+	border: 			solid 1px white;
+	font-size: 			.9em;
+	color:				black;
+	position:			absolute;
+	text-align:			center;
 }
 
-.remembered {
-	color: #ABABAB;
+.visible.floor, .visible.upstair, .visible.downstair {
+	background-color: 	#E6E6E6;
+}
+
+.visible.wall {
+	background-color:	#666666;
+}
+
+.remembered.floor, .remembered.upstair, .remembered.downstair {
+	background-color:	#B2B2B2;
+}
+
+.remembered.wall {
+	background-color:	#333333;
+}
+
+.clicked {
+	border: 1px solid green;
 }
