@@ -1,5 +1,4 @@
-http = require 'http'
-static = require 'node-static'
+app = require 'express'.createServer()
 gameState = require './gameState'
 Level = require './level'
 Player = require './player'
@@ -11,9 +10,23 @@ clientFiles = new static.Server()
 levels = new Level false
 ourState = new gameState levels
 
-server = http.createServer (req, res) ->
-    req.addListener 'end', ->
-        clientFiles.serve req, res
+db = new Db('unityrl', new dbServer(localhost, Connection.DEFAULT_PORT, {}), {native_parser: true});
+db.open (err, db) ->
+    if err
+        console.log err
+    else
+        console.log "Connected to db server."
+
+app.use express.cookieDecoder()
+app.use express.session()
+
+app.get '/', (req, res) ->
+    res.render 'index.jade', {title: 'UnityRL'}
+
+app.get '/play', (req, res) ->
+    res.render 'play.jade', {title: 'UnityRL'}
+
+    
 
 io = require('socket.io').listen server
 io.set('log level', 2)
@@ -21,10 +34,7 @@ io.set('close timeout', 60*60*24)
 
 server.listen(8000)
 
-db = new Db('unityrl', new dbServer(localhost, Connection.DEFAULT_PORT, {}), {native_parser: true});
-db.open (err, db) ->
-    if err
-        console.log err
+
 
 io.sockets.on 'connection', (socket) ->
     

@@ -3,9 +3,16 @@
         <title>Unity MMORogue</title>
         <link rel="stylesheet" type="text/css" href="unity.css" />
         <script type="text/javascript"
+                src="/socket.io/socket.io.js"></script>
+        <script type="text/javascript"
                 src="http://code.jquery.com/jquery.min.js"></script>
+        <script type="text/javascript" src="index.js"></script>
     </head>
     <body>
+		<div id="thegame">
+        	<div id="map">
+        	</div>
+		</div>
 		<div id="login">
         	<div id="floater">
         	</div>
@@ -15,6 +22,16 @@
                 	<input type="text" id="nameText"/>
             	</p>
         	</div> 
+        </div>
+		
+        <div id="messages">
+			<div>
+				Level Chat:
+			<div id="level">
+			</div>
+			<div>
+				<input type="text" id="levelChat"/>
+			</div>
         </div>
     </body>
 </html>
