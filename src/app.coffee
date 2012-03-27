@@ -29,7 +29,13 @@ app.get '/', (req, res) ->
     res.render 'index.jade', {title: 'UnityRL'}
 
 app.get '/play', (req, res) ->
-    res.render 'play.jade', {title: 'UnityRL'}
+    # Check to see if logged in, if so take them to play, else redirect back to /
+    playerCollection.count {session: req.sessionID}, (err, result) ->
+        if not err and result == 1
+            res.render 'play.jade', {title: 'UnityRL'}
+        else
+            res.flash 'info', "Please log in before trying to play."
+            res.render '/'
 
 app.get '/login', (req, res) ->
     # Check the password against the DB, set cookie if valid, else redirect with failed login.
@@ -66,20 +72,14 @@ io.set 'authorization', (data, accept) ->
 
 
 io.sockets.on 'connection', (socket) ->
-    
-    socket.on 'new user', (message) ->
-        # Going to have to figure out what to do with new users...
-        db.find {name: message}, (err, cursor) ->
-          if cursor.count = 1
-            # Create a new player object from the db...
-        
-        
-        newGuy = new Player message, 0
-        ourState.addPlayer socket.id, newGuy
-        ourState.getLevel(0).addPlayer socket.id, newGuy
-        client.emit 'update', ourState.getLevel(0).povObject(id) for id, client of io.sockets.sockets
-        socket.join 0
-        true
+    playerCollection.find {session: socket.handshake.sessionID}, (err, cursor) ->
+        # If this socket is associated with a session ...
+        unless err
+            cursor.nextObject (err, dbplayer) ->
+                ourState.addPlayer socket.id dbplayer
+                ourState.getLevel(dbplayer.dlvl).addPlayer socket.id dbplayer
+                client.emit 'update', ourState.getLevel(dbplayer.dlvl).povObject(id) for id, client of io.sockets.sockets
+                socket.join dbplayer.dlvl
 
     socket.on 'level chat', (message) ->
         player = ourState.getPlayer(socket.id)
