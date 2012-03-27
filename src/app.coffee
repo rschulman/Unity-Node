@@ -1,4 +1,5 @@
 app = require 'express'.createServer()
+parseCookie = require 'connect'.utils.parseCookie
 gameState = require './gameState'
 Level = require './level'
 Player = require './player'
@@ -10,15 +11,19 @@ clientFiles = new static.Server()
 levels = new Level false
 ourState = new gameState levels
 
+playerCollection = {}
+
 db = new Db('unityrl', new dbServer(localhost, Connection.DEFAULT_PORT, {}), {native_parser: true});
-db.open (err, db) ->
+db.open (err, db_object) ->
     if err
         console.log err
     else
         console.log "Connected to db server."
+        playerCollection = new mongodb.Collection db_object, 'players' 
 
-app.use express.cookieDecoder()
+app.use express.cookieParser()
 app.use express.session()
+app.use express.bodyParser()
 
 app.get '/', (req, res) ->
     res.render 'index.jade', {title: 'UnityRL'}
@@ -26,13 +31,37 @@ app.get '/', (req, res) ->
 app.get '/play', (req, res) ->
     res.render 'play.jade', {title: 'UnityRL'}
 
-    
+app.get '/login', (req, res) ->
+    # Check the password against the DB, set cookie if valid, else redirect with failed login.
+    loggedin = false
+    username = req.param 'name'
+    pass = req.param 'pass'
+    playerCollection.find {name: username}, (err, cursor) ->
+        if cursor.count == 1
+            cursor.nextObject (err, player) ->
+                if player.password = pass
+                    loggedin = true
+                    playerCollection.update {name: username}, {$set: {session: req.sessionID}}
+                    res.render '/'
+                else
+                    req.flash 'info', "Login failed, please try again."
+                    res.render '/'
+        else
+            req.flash 'info', "Login failed, please try again."
+            res.render '/'
 
-io = require('socket.io').listen server
-io.set('log level', 2)
-io.set('close timeout', 60*60*24)
+app.listen(8000) 
 
-server.listen(8000)
+io = require('socket.io').listen app
+io.set 'log level', 2
+io.set 'close timeout', 60*60*24
+io.set 'authorization', (data, accept) ->
+    if data.headers.cookie
+        data.cookie = parseCookie data.headers.cookie
+        data.sessionID = data.cookie['express.sid']
+    else
+        return accept 'No cookie.', false
+    accept null, true
 
 
 
