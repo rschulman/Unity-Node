@@ -89,7 +89,6 @@ io.sockets.on 'connection', (socket) ->
 
     socket.on 'send map', (message) ->
         where = ourState.getPlayer(socket.id).level
-        console.log JSON.stringify ourState.getLevel(where)
         socket.emit 'update', ourState.getLevel(where).povObject()
         true
 
