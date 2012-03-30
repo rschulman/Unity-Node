@@ -1,19 +1,17 @@
-app = require 'express'.createServer()
-parseCookie = require 'connect'.utils.parseCookie
+express = require 'express'
 gameState = require './gameState'
 Level = require './level'
 Player = require './player'
-Db = require 'mongodb'.Db
-Connection = require 'mongodb'.Connection
-dbServer = require 'mongodb'.Server
+mongodb = require 'mongodb'
 
-clientFiles = new static.Server()
+app = express.createServer()
+
 levels = new Level false
 ourState = new gameState levels
 
 playerCollection = {}
 
-db = new Db('unityrl', new dbServer(localhost, Connection.DEFAULT_PORT, {}), {native_parser: true});
+db = new mongodb.Db('unityrl', new mongodb.Server('127.0.0.1', mongodb.Connection.DEFAULT_PORT, {}), {native_parser: false});
 db.open (err, db_object) ->
     if err
         console.log err
@@ -22,52 +20,64 @@ db.open (err, db_object) ->
         playerCollection = new mongodb.Collection db_object, 'players' 
 
 app.use express.cookieParser()
-app.use express.session()
+app.use express.session({secret: "roguelike"})
 app.use express.bodyParser()
 
 app.get '/', (req, res) ->
-    res.render 'index.jade'
+    playerCollection.find {sessionID: req.sessionID}, (err, cursor) ->
+        if cursor.count == 1
+            cursor.nextObject (err, player) ->
+                res.render 'index.jade', {layout: false, player: player}
+        else
+            res.render 'index.jade', {layout: false}
+    false
 
 app.get '/play', (req, res) ->
     # Check to see if logged in, if so take them to play, else redirect back to /
     playerCollection.count {session: req.sessionID}, (err, result) ->
         if not err and result == 1
-            res.render 'play.jade'
+            res.render 'play.jade', {layout: false}
         else
             res.flash 'info', "Please log in before trying to play."
-            res.render 'index.jade'
+            res.render 'index.jade', {layout: false}
 
-app.get '/login', (req, res) ->
+app.post '/login', (req, res) ->
     # Check the password against the DB, set cookie if valid, else redirect with failed login.
     loggedin = false
-    username = req.param 'name'
-    pass = req.param 'pass'
+    username = req.body.name
+    pass = req.body.pass
     playerCollection.find {name: username}, (err, cursor) ->
         if cursor.count == 1
             cursor.nextObject (err, player) ->
                 if player.password = pass
                     loggedin = true
                     playerCollection.update {name: username}, {$set: {session: req.sessionID}}
-                    res.render 'index.jade', player
+                    res.render 'index.jade', {layout: false, player: player}
                 else
                     req.flash 'info', "Login failed, please try again."
-                    res.render 'index.jade'
+                    res.render 'index.jade', {layout: false}
         else
             req.flash 'info', "Login failed, please try again."
-            res.render 'index.jade'
+            res.render 'index.jade', {layout: false}
 
-app.get '/new', (req, res) ->
+app.get '/create', (req, res) ->
+    # Serve the create jade file.
+    res.render 'create.jade', {layout: false}
+
+app.post '/new', (req, res) ->
     # See if that username already exists. If not, create a new player and add to db.
-    username = req.param 'name'
-    pass = req.param 'pass'
+    username = req.body.name
+    pass = req.param('pass')
+    console.log "Creating a new character named " + username
     playerCollection.count {name: username}, (err, result) ->
         if result == 0 # No such name in db, make a new character, insert it, and log in user.
             victim = new Player username, pass, req.sessionID
+            console.log victim
             playerCollection.insert victim
-            res.render '/'
+            res.render 'index.jade', {layout: false}
         else
             req.flash 'info', 'That character name is taken, please try another.'
-            res.render '/'
+            res.render 'index.jade', {layout: false}
 
 app.listen(8000) 
 
@@ -90,7 +100,8 @@ io.sockets.on 'connection', (socket) ->
         unless err
             cursor.nextObject (err, dbplayer) ->
                 ourState.addPlayer socket.id dbplayer
-                ourState.getLevel(dbplayer.dlvl).addPlayer socket.id dbplayer
+                # Need to create a new Player object with the elements from dbplayer so the object will have the functions as well.
+                ourState.getLevel(dbplayer.getLevel()).addPlayer socket.id dbplayer
                 client.emit 'update', ourState.getLevel(dbplayer.dlvl).povObject(id) for id, client of io.sockets.sockets
                 socket.join dbplayer.dlvl
 

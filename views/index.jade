@@ -1,0 +1,24 @@
+doctype 5
+html
+    head
+        title Unity MMORogue
+        link(rel="stylesheet", type="text/css", href="unity.css")
+        script(type="text/javascript", src="http://code.jquery.com/jquery.min.js")
+
+    body
+        div#login
+            div#floater
+            div#content
+                p(style="text-align:center") Welcome to UnityRL!
+                if (typeof player === "undefined")
+                    | Please login:
+                    form(name="login", action="/login", method="POST")
+                        p Username:
+                            input(type="text", name="name", id="name")
+                        p Password:
+                            input(type="password", name="pass", id="pass")
+                        input(type="submit", value"Login!")
+                        p 
+                            a(href="/create") Create a new character.
+                else
+                    a(href="/play") Start playing!
