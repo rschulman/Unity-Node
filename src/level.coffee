@@ -131,8 +131,9 @@ class Level
 				staircol = Math.floor Math.random() * MAXCOLS
 	
 	addPlayer: (id, player) ->
-		player.x = upx
-		player.y = upy
+		if player.x == - 1 or player.y == -1
+			player.x = upx
+			player.y = upy
 		players[id] = player
 		
 	movePlayer: (socketid, vector) ->

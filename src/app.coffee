@@ -26,16 +26,16 @@ app.use express.session()
 app.use express.bodyParser()
 
 app.get '/', (req, res) ->
-    res.render 'index.jade', {title: 'UnityRL'}
+    res.render 'index.jade'
 
 app.get '/play', (req, res) ->
     # Check to see if logged in, if so take them to play, else redirect back to /
     playerCollection.count {session: req.sessionID}, (err, result) ->
         if not err and result == 1
-            res.render 'play.jade', {title: 'UnityRL'}
+            res.render 'play.jade'
         else
             res.flash 'info', "Please log in before trying to play."
-            res.render '/'
+            res.render 'index.jade'
 
 app.get '/login', (req, res) ->
     # Check the password against the DB, set cookie if valid, else redirect with failed login.
@@ -48,12 +48,25 @@ app.get '/login', (req, res) ->
                 if player.password = pass
                     loggedin = true
                     playerCollection.update {name: username}, {$set: {session: req.sessionID}}
-                    res.render '/'
+                    res.render 'index.jade', player
                 else
                     req.flash 'info', "Login failed, please try again."
-                    res.render '/'
+                    res.render 'index.jade'
         else
             req.flash 'info', "Login failed, please try again."
+            res.render 'index.jade'
+
+app.get '/new', (req, res) ->
+    # See if that username already exists. If not, create a new player and add to db.
+    username = req.param 'name'
+    pass = req.param 'pass'
+    playerCollection.count {name: username}, (err, result) ->
+        if result == 0 # No such name in db, make a new character, insert it, and log in user.
+            victim = new Player username, pass, req.sessionID
+            playerCollection.insert victim
+            res.render '/'
+        else
+            req.flash 'info', 'That character name is taken, please try another.'
             res.render '/'
 
 app.listen(8000) 
@@ -97,4 +110,20 @@ io.sockets.on 'connection', (socket) ->
         ourState.getLevel(where).movePlayer(socket.id, message.split " ")
         client.emit 'update', ourState.getLevel(where).povObject(id) for id, client of io.sockets.sockets
         true
+
+    socket.on 'disconnect', () ->
+        departing = ourState.getPlayer(socket.id)
+        updatehash = 
+            dlvl: departing.getDlvl()
+            xp: departing.getXP()
+            x: departing.x
+            y: departing.y
+            inventory: departing.inventory
+        playerCollection.update {session: socket.handshake.sessionID}, {$set: updatehash}, (err) ->
+            if err
+                console.log err
+        
+        
+        true
+    
     true
