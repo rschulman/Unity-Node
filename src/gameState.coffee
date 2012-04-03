@@ -14,4 +14,9 @@ class gameState
     getLevel: (dlvl) ->
         levels[dlvl]
 
+    playerLogOut: (id) ->
+        delete players[id]
+    
+    
+
 module.exports = gameState

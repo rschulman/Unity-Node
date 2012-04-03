@@ -146,14 +146,6 @@ class Level
 		subject.x += parseInt(vector[0])
 		subject.y += parseInt(vector[1])
 		true
-
-	
-	toJSON: (id) ->
-		# For now the only thing to return is the PCs and positions.
-		elements = 
-			pcs: {}
-		elements.pcs[player.getName()] = player.getPos() for id, player of players
-		JSON.stringify(elements)
 	
 	povObject: (id) ->
 		vision = 8 # How far can a PC see
@@ -199,5 +191,8 @@ class Level
 		elements.you = [subject.x, subject.y] # The player knows his own location, presumeably...
 		elements
 
+	playerLogOut: (id) ->
+	  	delete players[id]
+	  	console.log players
 
 module.exports = Level
