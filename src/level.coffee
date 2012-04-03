@@ -129,9 +129,19 @@ class Level
 					doneup = true
 				stairrow = Math.floor Math.random() * MAXROWS
 				staircol = Math.floor Math.random() * MAXCOLS
-	
+
+	save: (levelCollection, depth) ->
+		updatehash = 
+			dlvl: depth
+			data: data
+		levelCollection.update {dlvl: dlvl}, {$set: updatehash}, {safe: true, upsert: true}, (err) ->
+			if err
+				console.log err
+			else
+				console.log "Saved level: " + depth
+
 	addPlayer: (id, player) ->
-		if player.x == - 1 or player.y == -1
+		if player.x == - 1 or player.y == -1 or data[y][x] != "floor"
 			player.x = upx
 			player.y = upy
 		players[id] = player

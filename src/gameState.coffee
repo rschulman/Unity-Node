@@ -2,8 +2,8 @@ class gameState
     players = {}
     levels = []
     
-    constructor: (town) ->
-        levels[0] = town
+    constructor: (levelobject, dlvl) ->
+        levels[dlvl] = levelobject
 
     addPlayer: (id, player) ->
         players[id] = player
