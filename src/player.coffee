@@ -12,6 +12,9 @@ class Player
     getLevel: () =>
         @dlvl
 
+    setDlvl: (newlevel) ->
+        @dlvl = newlevel
+
     getName: () =>
         @name
 

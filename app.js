@@ -219,19 +219,16 @@
     }, function(err, cursor) {
       if (!err) {
         return cursor.nextObject(function(err, dbplayer) {
-          var client, id, inserting, _ref, _results;
+          var inserting;
           if (dbplayer.x == null) dbplayer.x = -1;
           if (dbplayer.y == null) dbplayer.y = -1;
           inserting = new Player(dbplayer.name, dbplayer.pass, dbplayer.dlvl, dbplayer.xp, dbplayer.x, dbplayer.y, dbplayer.sessionID);
           ourState.addPlayer(socket.id, inserting);
-          ourState.getLevel(inserting.getLevel()).addPlayer(socket.id, inserting);
-          _ref = io.sockets.sockets;
-          _results = [];
-          for (id in _ref) {
-            client = _ref[id];
-            _results.push(client.emit('update', ourState.getLevel(inserting.getLevel()).povObject(id)));
-          }
-          return _results;
+          ourState.getLevel(inserting.getLevel()).addPlayer(socket.id, inserting, {
+            stairs: false
+          });
+          socket.join(inserting.getLevel());
+          return ourState.getLevel(inserting.getLevel()).povObject(io.sockets);
         });
       }
     });
@@ -249,18 +246,20 @@
       return true;
     });
     socket.on('move', function(message) {
-      var client, id, where, _ref;
+      var where;
       where = ourState.getPlayer(socket.id).getLevel();
       ourState.getLevel(where).movePlayer(socket.id, message.split(" "));
-      _ref = io.sockets.sockets;
-      for (id in _ref) {
-        client = _ref[id];
-        client.emit('update', ourState.getLevel(where).povObject(id));
-      }
+      ourState.getLevel(where).povObject(io.sockets);
       return true;
     });
+    socket.on('levelchange', function(message) {
+      return ourState.playerLevelMove(socket.id, message, levelCollection, function(where, newwhere) {
+        ourState.getLevel(where).povObject(io.sockets);
+        return ourState.getLevel(newwhere).povObject(io.sockets);
+      });
+    });
     socket.on('disconnect', function() {
-      var client, departing, id, updatehash, _ref;
+      var departing, updatehash;
       departing = ourState.getPlayer(socket.id);
       updatehash = {
         dlvl: departing.getLevel(),
@@ -285,13 +284,6 @@
       });
       ourState.getLevel(departing.getLevel()).playerLogOut(socket.id);
       ourState.playerLogOut(socket.id);
-      _ref = io.sockets.sockets;
-      for (id in _ref) {
-        client = _ref[id];
-        if (id !== socket.id) {
-          client.emit('update', ourState.getLevel(departing.getLevel()).povObject(id));
-        }
-      }
       return true;
     });
     return true;
