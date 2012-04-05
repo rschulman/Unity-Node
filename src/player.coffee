@@ -1,13 +1,21 @@
 class Player
-	name = ""
-	level = 0
+    name = ""
+    pass = ""
+    dlvl = 0
+    xp = 0
+    sessionID = ""
+    x: -1
+    y: -1
 
-	constructor: (@name, @level) ->
+    constructor: (@name, @pass, @dlvl, @xp, @x, @y, @sessionID) ->
 
-	getLevel: () =>
-		@level
+    getLevel: () =>
+        @dlvl
 
-	getName: () =>
-		@name
+    getName: () =>
+        @name
+
+    getXP: () ->
+        @xp
 
 module.exports = Player

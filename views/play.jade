@@ -1,0 +1,17 @@
+doctype 5
+html
+    head
+        link(rel="stylesheet", type="text/css", href="public/unity.css")
+        script(type="text/javascript", src="http://code.jquery.com/jquery.min.js")
+        script(type="text/javascript", src="/socket.io/socket.io.js")
+        script(type="text/javascript", src="public/index.js")
+    body
+        div#thegame
+            div#map
+        div#info
+        div#messages
+            div
+                | Level Chat:
+            div#level
+            div
+                input#levelChat(type="text")

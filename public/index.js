@@ -53,11 +53,11 @@ var constructMap = function (object_data, tempCopy) {
       row = tempCopy[_j];
       for (_x = centerx - WINDOW/2, _len3 = centerx + WINDOW/2; _x < _len3; _x++) {
         if (row[_x].visible) {
-          var divbuild = '<div class="tile visible ';
+          var divbuild = '<div class="tile visible';
 		  if (row[_x].contents == "player") {
             divbuild += row[_x].id;
           }
-          divbuild += " " + row[_x].tile + '" style="top: ' + Math.floor(tilecounter/40) * 16 + '; left: ' + (tilecounter % 40) * 16 + ';">';
+          divbuild += " " + row[_x].tile + '" style="top: ' + Math.floor(tilecounter/40) * 16 + 'px; left: ' + (tilecounter % 40) * 16 + 'px;">';
           if (row[_x].contents == "player") {
 		    divbuild += "@";
 		  }
@@ -71,7 +71,7 @@ var constructMap = function (object_data, tempCopy) {
           $("#map").append(divbuild);
         }
         else if (row[_x].remembered) {
-	          var divbuild = '<div class="tile remembered ' + row[_x].tile + '" style="top: ' + Math.floor(tilecounter/40) * 16 + '; left: ' + (tilecounter % 40) * 16 + ';">';
+	          var divbuild = '<div class="tile remembered ' + row[_x].tile + '" style="top: ' + Math.floor(tilecounter/40) * 16 + 'px; left: ' + (tilecounter % 40) * 16 + 'px;">';
 	          if (row[_x].tile == "player") {
 			    divbuild += "@";
 			  }
@@ -217,5 +217,4 @@ $(document).ready(function() {
               break;
         }
     });
-	$('#login').show();
 });

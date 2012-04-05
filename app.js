@@ -1,23 +1,25 @@
 (function() {
-  var Level, Player, app, db, express, gameState, io, levels, mongodb, ourState, playerCollection;
+  var Level, Player, app, connect, db, express, gameState, io, levelCollection, mongodb, ourState, parseCookie, playerCollection;
 
   express = require('express');
 
-  gameState = require('.lib//gameState');
+  gameState = require('./lib/gameState');
 
-  Level = require('.lib/level');
+  Level = require('./lib/level');
 
-  Player = require('.lib/player');
+  Player = require('./lib/player');
 
   mongodb = require('mongodb');
 
+  connect = require('express/node_modules/connect');
+
   app = express.createServer();
 
-  levels = new Level(false);
-
-  ourState = new gameState(levels);
-
   playerCollection = {};
+
+  levelCollection = {};
+
+  ourState = {};
 
   db = new mongodb.Db('unityrl', new mongodb.Server('127.0.0.1', mongodb.Connection.DEFAULT_PORT, {}), {
     native_parser: false
@@ -25,46 +27,75 @@
 
   db.open(function(err, db_object) {
     if (err) {
-      return console.log(err);
+      console.log(err);
+      return false;
     } else {
       console.log("Connected to db server.");
-      return playerCollection = new mongodb.Collection(db_object, 'players');
+      playerCollection = new mongodb.Collection(db_object, 'players');
+      levelCollection = new mongodb.Collection(db_object, 'levels');
+      levelCollection.find({
+        dlvl: 0
+      }, function(err, cursor) {
+        return cursor.count(function(err, number) {
+          var levelobject;
+          if (number === 1) {
+            return cursor.nextObject(function(err, loadlevel) {
+              var levelobject;
+              levelobject = new Level({
+                generate: false
+              }, loadlevel);
+              console.log("Loaded level 0 from db");
+              return ourState = new gameState(levelobject, 0);
+            });
+          } else {
+            levelobject = new Level({
+              generate: true,
+              type: "dungeon"
+            }, []);
+            levelobject.save(levelCollection, 0);
+            return ourState = new gameState(levelobject, 0);
+          }
+        });
+      });
+      return true;
     }
   });
 
   app.use(express.cookieParser());
 
   app.use(express.session({
-    secret: "roguelike"
+    secret: "roguelike",
+    key: 'express.sid'
   }));
 
   app.use(express.bodyParser());
 
   app.use(express.logger());
 
-  app.use('/public', express.static(__dirname + '../public'));
+  app.use('/public', express.static(__dirname + '/public'));
 
   app.get('/', function(req, res) {
-    console.log(req.sessionID);
     playerCollection.find({
       sessionID: req.sessionID
     }, function(err, cursor) {
-      if (cursor.count === 1) {
-        console.log("Found a logged in player.");
-        return cursor.nextObject(function(err, loggedplayer) {
-          console.log(loggedplayer);
-          return res.render('index.jade', {
-            layout: false,
-            locals: {
-              player: loggedplayer
-            }
+      return cursor.count(function(err, number) {
+        if (number === 1) {
+          console.log("Found a logged in player.");
+          return cursor.nextObject(function(err, loggedplayer) {
+            console.log(loggedplayer);
+            return res.render('index.jade', {
+              layout: false,
+              locals: {
+                player: loggedplayer
+              }
+            });
           });
-        });
-      } else {
-        return res.render('index.jade', {
-          layout: false
-        });
-      }
+        } else {
+          return res.render('index.jade', {
+            layout: false
+          });
+        }
+      });
     });
     return false;
   });
@@ -98,7 +129,7 @@
       return cursor.count(function(err, number) {
         if (number === 1) {
           return cursor.nextObject(function(err, player) {
-            if (player.pass = pass) {
+            if (player.pass === pass) {
               loggedin = true;
               console.log("Logged in " + username);
               playerCollection.update({
@@ -110,7 +141,9 @@
               });
               return res.render('index.jade', {
                 layout: false,
-                player: player
+                locals: {
+                  player: player
+                }
               });
             } else {
               req.flash('info', "Login failed, please try again.");
@@ -146,8 +179,7 @@
     }, function(err, result) {
       var victim;
       if (result === 0) {
-        victim = new Player(username, pass, req.sessionID);
-        console.log(victim);
+        victim = new Player(username, pass, 0, 0, -1, -1, req.sessionID);
         playerCollection.insert(victim);
         return res.render('index.jade', {
           layout: false
@@ -162,6 +194,8 @@
   });
 
   app.listen(8000);
+
+  parseCookie = connect.utils.parseCookie;
 
   io = require('socket.io').listen(app);
 
@@ -181,19 +215,23 @@
 
   io.sockets.on('connection', function(socket) {
     playerCollection.find({
-      session: socket.handshake.sessionID
+      sessionID: socket.handshake.sessionID
     }, function(err, cursor) {
       if (!err) {
         return cursor.nextObject(function(err, dbplayer) {
-          var client, id, _ref;
-          ourState.addPlayer(socket.id(dbplayer));
-          ourState.getLevel(dbplayer.getLevel()).addPlayer(socket.id(dbplayer));
+          var client, id, inserting, _ref, _results;
+          if (dbplayer.x == null) dbplayer.x = -1;
+          if (dbplayer.y == null) dbplayer.y = -1;
+          inserting = new Player(dbplayer.name, dbplayer.pass, dbplayer.dlvl, dbplayer.xp, dbplayer.x, dbplayer.y, dbplayer.sessionID);
+          ourState.addPlayer(socket.id, inserting);
+          ourState.getLevel(inserting.getLevel()).addPlayer(socket.id, inserting);
           _ref = io.sockets.sockets;
+          _results = [];
           for (id in _ref) {
             client = _ref[id];
-            client.emit('update', ourState.getLevel(dbplayer.dlvl).povObject(id));
+            _results.push(client.emit('update', ourState.getLevel(inserting.getLevel()).povObject(id)));
           }
-          return socket.join(dbplayer.dlvl);
+          return _results;
         });
       }
     });
@@ -212,7 +250,7 @@
     });
     socket.on('move', function(message) {
       var client, id, where, _ref;
-      where = ourState.getPlayer(socket.id).level;
+      where = ourState.getPlayer(socket.id).getLevel();
       ourState.getLevel(where).movePlayer(socket.id, message.split(" "));
       _ref = io.sockets.sockets;
       for (id in _ref) {
@@ -222,22 +260,38 @@
       return true;
     });
     socket.on('disconnect', function() {
-      var departing, updatehash;
+      var client, departing, id, updatehash, _ref;
       departing = ourState.getPlayer(socket.id);
       updatehash = {
-        dlvl: departing.getDlvl(),
+        dlvl: departing.getLevel(),
         xp: departing.getXP(),
         x: departing.x,
         y: departing.y,
         inventory: departing.inventory
       };
+      console.log(updatehash);
       playerCollection.update({
-        session: socket.handshake.sessionID
+        name: departing.getName()
       }, {
         $set: updatehash
+      }, {
+        safe: true
       }, function(err) {
-        if (err) return console.log(err);
+        if (err) {
+          return console.log(err);
+        } else {
+          return console.log("Saved player: " + departing.getName());
+        }
       });
+      ourState.getLevel(departing.getLevel()).playerLogOut(socket.id);
+      ourState.playerLogOut(socket.id);
+      _ref = io.sockets.sockets;
+      for (id in _ref) {
+        client = _ref[id];
+        if (id !== socket.id) {
+          client.emit('update', ourState.getLevel(departing.getLevel()).povObject(id));
+        }
+      }
       return true;
     });
     return true;
