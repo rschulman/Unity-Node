@@ -9,19 +9,29 @@ app = express.createServer()
 
 playerCollection = {}
 levelCollection = {}
+ourState = {}
 
 db = new mongodb.Db('unityrl', new mongodb.Server('127.0.0.1', mongodb.Connection.DEFAULT_PORT, {}), {native_parser: false});
 db.open (err, db_object) ->
     if err
         console.log err
+        false
     else
         console.log "Connected to db server."
         playerCollection = new mongodb.Collection db_object, 'players' 
         levelCollection = new mongodb.Collection db_object, 'levels'
-
-levels = new Level false
-levels.save(levelCollection, 0)
-ourState = new gameState levels, 0
+        levelCollection.find {dlvl: 0}, (err, cursor) ->
+            cursor.count (err, number) ->
+                if number == 1
+                    cursor.nextObject (err, loadlevel) ->
+                        levelobject = new Level {generate: false}, loadlevel
+                        console.log "Loaded level 0 from db"
+                        ourState = new gameState levelobject, 0
+                else
+                    levelobject = new Level {generate: true, type: "dungeon"}, []
+                    levelobject.save(levelCollection, 0)
+                    ourState = new gameState levelobject, 0
+        true
 
 app.use express.cookieParser()
 app.use express.session({secret: "roguelike", key: 'express.sid'})

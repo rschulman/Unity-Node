@@ -30,12 +30,18 @@ class Level
 		data[y-1][x+1] = "wall" if data[y-1][x+1] == " "
 		data[y+1][x-1] = "wall" if data[y+1][x-1] == " "
 
-	constructor: (is_town) ->
-		if is_town
-			data[row][col] = "floor" for row in [0..MAXROWS] for col in [0..MAXCOLS]
-			stairrow = Math.floor Math.random() * 40
-			staircol = Math.floor Math.random() * 80
-			data[stairrow][staircol] = "downstair"
+	constructor: (options, saved) ->
+		if not options.generate
+			# We're loading from a db
+			data[row][col] = " " for row in [0..MAXROWS] for col in [0..MAXROWS]
+			data[tile[0]][tile[1]] = "wall" for tile in saved.data["wall"]
+			data[tile[0]][tile[1]] = "floor" for tile in saved.data["floor"]
+			data[tile[0]][tile[1]] = "upstair" for tile in saved.data["upstair"]
+			data[tile[0]][tile[1]] = "downstair" for tile in saved.data["downstair"]
+			downy = saved.downstair[0]
+			downx = saved.downstair[1]
+			upy = saved.upstair[0]
+			upx = saved.upstair[1]
 		else
 			# Time to generate a random level...
 			# Random range = Math.floor(Math.random() * (to-from+1) + from)
@@ -131,17 +137,27 @@ class Level
 				staircol = Math.floor Math.random() * MAXCOLS
 
 	save: (levelCollection, depth) ->
+		terrain =
+			"wall":[]
+			"floor":[]
+			"upstair":[]
+			"downstair":[]
+		for row in [0..MAXROWS]
+			for col in [0..MAXROWS]
+				terrain[data[row][col]].push([row, col]) if data[row][col] isnt " "
 		updatehash = 
 			dlvl: depth
-			data: data
-		levelCollection.update {dlvl: dlvl}, {$set: updatehash}, {safe: true, upsert: true}, (err) ->
+			data: terrain
+			downstair: [downy, downx]
+			upstair: [upy, upx]
+		levelCollection.update {dlvl: depth}, {$set: updatehash}, {safe: true, upsert: true}, (err) ->
 			if err
 				console.log err
 			else
 				console.log "Saved level: " + depth
 
 	addPlayer: (id, player) ->
-		if player.x == - 1 or player.y == -1 or data[y][x] != "floor"
+		if player.x == -1 or player.y == -1 or data[player.y][player.x] != "floor"
 			player.x = upx
 			player.y = upy
 		players[id] = player
@@ -202,7 +218,6 @@ class Level
 		elements
 
 	playerLogOut: (id) ->
-	  	delete players[id]
-	  	console.log players
+		delete players[id]
 
 module.exports = Level

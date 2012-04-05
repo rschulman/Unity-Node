@@ -1,5 +1,5 @@
 (function() {
-  var Level, Player, app, connect, db, express, gameState, io, levels, mongodb, ourState, parseCookie, playerCollection;
+  var Level, Player, app, connect, db, express, gameState, io, levelCollection, mongodb, ourState, parseCookie, playerCollection;
 
   express = require('express');
 
@@ -15,11 +15,11 @@
 
   app = express.createServer();
 
-  levels = new Level(false);
-
-  ourState = new gameState(levels);
-
   playerCollection = {};
+
+  levelCollection = {};
+
+  ourState = {};
 
   db = new mongodb.Db('unityrl', new mongodb.Server('127.0.0.1', mongodb.Connection.DEFAULT_PORT, {}), {
     native_parser: false
@@ -27,10 +27,37 @@
 
   db.open(function(err, db_object) {
     if (err) {
-      return console.log(err);
+      console.log(err);
+      return false;
     } else {
       console.log("Connected to db server.");
-      return playerCollection = new mongodb.Collection(db_object, 'players');
+      playerCollection = new mongodb.Collection(db_object, 'players');
+      levelCollection = new mongodb.Collection(db_object, 'levels');
+      levelCollection.find({
+        dlvl: 0
+      }, function(err, cursor) {
+        return cursor.count(function(err, number) {
+          var levelobject;
+          if (number === 1) {
+            return cursor.nextObject(function(err, loadlevel) {
+              var levelobject;
+              levelobject = new Level({
+                generate: false
+              }, loadlevel);
+              console.log("Loaded level 0 from db");
+              return ourState = new gameState(levelobject, 0);
+            });
+          } else {
+            levelobject = new Level({
+              generate: true,
+              type: "dungeon"
+            }, []);
+            levelobject.save(levelCollection, 0);
+            return ourState = new gameState(levelobject, 0);
+          }
+        });
+      });
+      return true;
     }
   });
 
