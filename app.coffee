@@ -127,9 +127,20 @@ io.sockets.on 'connection', (socket) ->
                 dbplayer.y ?= -1
                 inserting = new Player dbplayer.name, dbplayer.pass, dbplayer.dlvl, dbplayer.xp, dbplayer.x, dbplayer.y, dbplayer.sessionID
                 ourState.addPlayer socket.id, inserting
-                ourState.getLevel(inserting.getLevel()).addPlayer socket.id, inserting, {stairs: false}
+                where = inserting.getLevel()
+                if ourState.getLevel where
+                    ourState.getLevel(inserting.getLevel()).addPlayer socket.id, inserting, {stairs: false}
+                    ourState.getLevel(inserting.getLevel()).povObject(io.sockets)
+                else
+                    levelCollection.find {dlvl: where}, (err, cursor) ->
+                        cursor.count (err, number) ->
+                            if number == 1
+                                console.log "Level exists in DB"
+                                cursor.nextObject (err, loadlevel) ->
+                                    ourState.addLevel where, new Level {generate: false}, loadlevel
+                                    console.log "Loaded level " + where + " from db"
+                                    ourState.getLevel(inserting.getLevel()).povObject(io.sockets)
                 socket.join inserting.getLevel()
-                ourState.getLevel(inserting.getLevel()).povObject(io.sockets)
 
     socket.on 'level chat', (message) ->
         player = ourState.getPlayer(socket.id)

@@ -14,7 +14,13 @@ class gameState
         players[id]
 
     getLevel: (dlvl) ->
-        levels[dlvl]
+        if levels[dlvl]?
+            levels[dlvl]
+        else
+            false
+
+    addLevel: (dlvl, level) ->
+        levels[dlvl] = level
 
     playerLogOut: (id) ->
         delete players[id]

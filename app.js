@@ -219,16 +219,36 @@
     }, function(err, cursor) {
       if (!err) {
         return cursor.nextObject(function(err, dbplayer) {
-          var inserting;
+          var inserting, where;
           if (dbplayer.x == null) dbplayer.x = -1;
           if (dbplayer.y == null) dbplayer.y = -1;
           inserting = new Player(dbplayer.name, dbplayer.pass, dbplayer.dlvl, dbplayer.xp, dbplayer.x, dbplayer.y, dbplayer.sessionID);
           ourState.addPlayer(socket.id, inserting);
-          ourState.getLevel(inserting.getLevel()).addPlayer(socket.id, inserting, {
-            stairs: false
-          });
-          socket.join(inserting.getLevel());
-          return ourState.getLevel(inserting.getLevel()).povObject(io.sockets);
+          where = inserting.getLevel();
+          if (ourState.getLevel(where)) {
+            ourState.getLevel(inserting.getLevel()).addPlayer(socket.id, inserting, {
+              stairs: false
+            });
+            ourState.getLevel(inserting.getLevel()).povObject(io.sockets);
+          } else {
+            levelCollection.find({
+              dlvl: where
+            }, function(err, cursor) {
+              return cursor.count(function(err, number) {
+                if (number === 1) {
+                  console.log("Level exists in DB");
+                  return cursor.nextObject(function(err, loadlevel) {
+                    ourState.addLevel(where, new Level({
+                      generate: false
+                    }, loadlevel));
+                    console.log("Loaded level " + where + " from db");
+                    return ourState.getLevel(inserting.getLevel()).povObject(io.sockets);
+                  });
+                }
+              });
+            });
+          }
+          return socket.join(inserting.getLevel());
         });
       }
     });
