@@ -47,11 +47,11 @@ var constructMap = function (object_data, tempCopy) {
 	if (centery > 1000 - WINDOW/2) {
 		centery = 1000 - WINDOW/2;
 	}
-    var our_canvas = $("#map");
-    var ctx = our_canvas.getContext('2d');
+    var our_canvas = $('#map');
+    var ctx = our_canvas.get(0).getContext('2d');
     ctx.clearRect(0, 0, our_canvas.width(), our_canvas.height());
 	var tilecounter = 0;
-    ctx.fillStyle = "rgb(41,41,41,)";
+    ctx.fillStyle = "rgb(41,41,41)";
     ctx.fillRect(0,0, our_canvas.width(), our_canvas.height());
 	for (_j = centery - WINDOW/2, _len2 = centery + WINDOW/2; _j < _len2; _j++) {
       row = tempCopy[_j];
@@ -63,19 +63,6 @@ var constructMap = function (object_data, tempCopy) {
           if (row[_x].tile == "wall") {
             ctx.fillStyle = "rgb(102,102,102)";
           }
-          ctx.fillRect(Math.floor(tilecounter/40), tilecounter % 40, 15, 15); // Top, left, width, height
-          if (row[_x].contents == "player") {
-            ctx.font = ".9em monospace"
-            ctx.fillText("@", Math.floor(tilecounter/40) + 7, (tilecounter % 40) + 7);
-		  }
-		  if (row[_x].tile == "upstair") {
-            ctx.font = ".9em monospace"
-            ctx.fillText("<", Math.floor(tilecounter/40) + 7, (tilecounter % 40) + 7);
-		  }
-		  if (row[_x].tile == "downstair") {
-            ctx.font = ".9em monospace"
-            ctx.fillText(">", Math.floor(tilecounter/40) + 7, (tilecounter % 40) + 7);
-		  }
         }
         else if (row[_x].remembered) {
           if (row[_x].tile == "floor") {
@@ -84,21 +71,21 @@ var constructMap = function (object_data, tempCopy) {
           if (row[_x].tile == "wall") {
             ctx.fillStyle = "rgb(51,51,51)";
           }
-          ctx.fillRect(Math.floor(tilecounter/40), tilecounter % 40, 15, 15); // Top, left, width, height
-          if (row[_x].contents == "player") {
-            ctx.font = ".9em monospace"
-            ctx.fillText("@", Math.floor(tilecounter/40) + 7, (tilecounter % 40) + 7);
-          }
-          if (row[_x].tile == "upstair") {
-            ctx.font = ".9em monospace"
-            ctx.fillText("<", Math.floor(tilecounter/40) + 7, (tilecounter % 40) + 7);
-          }
-          if (row[_x].tile == "downstair") {
-            ctx.font = ".9em monospace"
-            ctx.fillText(">", Math.floor(tilecounter/40) + 7, (tilecounter % 40) + 7);
-          }
+        }
+        ctx.fillRect(Math.floor(tilecounter/40) * 15, (tilecounter % 40) * 15, 15, 15); // Top, left, width, height
+        if (row[_x].contents == "player") {
+          ctx.font = ".9em monospace"
+          ctx.fillText("@", Math.floor(tilecounter/40) * 15 + 7, (tilecounter % 40) * 15 + 7);
 	    }
-		tilecounter++;
+	    if (row[_x].tile == "upstair") {
+          ctx.font = ".9em monospace"
+          ctx.fillText("<", Math.floor(tilecounter/40) * 15 + 7, (tilecounter % 40) * 15 + 7);
+	    }
+	    if (row[_x].tile == "downstair") {
+          ctx.font = ".9em monospace"
+          ctx.fillText(">", Math.floor(tilecounter/40) * 15 + 7, (tilecounter % 40) * 15 + 7);
+	    }
+        tilecounter++;
       }
     }
 
