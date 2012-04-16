@@ -49,15 +49,14 @@ var constructMap = function (object_data, tempCopy) {
 	}
     var our_canvas = $('#map');
     var ctx = our_canvas.get(0).getContext('2d');
-    ctx.clearRect(0, 0, our_canvas.width(), our_canvas.height());
-	var tilecounter = 0;
+    var tilecounter = 0;
     ctx.fillStyle = "rgb(41,41,41)";
     ctx.fillRect(0,0, our_canvas.width(), our_canvas.height());
 	for (_j = centery - WINDOW/2, _len2 = centery + WINDOW/2; _j < _len2; _j++) {
       row = tempCopy[_j];
       for (_x = centerx - WINDOW/2, _len3 = centerx + WINDOW/2; _x < _len3; _x++) {
         if (row[_x].visible) {
-          if (row[_x].tile == "floor") {
+          if (row[_x].tile == "floor" || row[_x].tile == "upstair" || row[_x].tile == "downstair") {
             ctx.fillStyle = "rgb(230,230,230)";
           }
           if (row[_x].tile == "wall") {
@@ -65,7 +64,7 @@ var constructMap = function (object_data, tempCopy) {
           }
         }
         else if (row[_x].remembered) {
-          if (row[_x].tile == "floor") {
+          if (row[_x].tile == "floor" || row[_x].tile == "upstair" || row[_x].tile == "downstair") {
             ctx.fillStyle = "rgb(178,178,178)";
           }
           if (row[_x].tile == "wall") {
@@ -80,15 +79,15 @@ var constructMap = function (object_data, tempCopy) {
           ctx.fillStyle = "rgb(36,36,36)";
 	  if (row[_x].contents == "player") {
             ctx.font = "1.2em monospace"
-            ctx.fillText("@", (tilecounter % 40) * 15 + 7, Math.floor(tilecounter/40) * 15 + 7);
+            ctx.fillText("@", (tilecounter % 40) * 15 + 4, Math.floor(tilecounter/40) * 15 + 11);
 	    }
 	  if (row[_x].tile == "upstair") {
-            ctx.font = ".9em monospace"
-            ctx.fillText("<", (tilecounter % 40) * 15 + 7, Math.floor(tilecounter/40) * 15 + 7);
+            ctx.font = "1.2em monospace"
+            ctx.fillText("<", (tilecounter % 40) * 15 + 4, Math.floor(tilecounter/40) * 15 + 11);
 	  }
 	  if (row[_x].tile == "downstair") {
-            ctx.font = ".9em monospace"
-            ctx.fillText(">", (tilecounter % 40) * 15 + 7, Math.floor(tilecounter/40) * 15 + 7);
+            ctx.font = "1.2em monospace"
+            ctx.fillText(">", (tilecounter % 40) * 15 + 4, Math.floor(tilecounter/40) * 15 + 11);
 	  }
 	}
         tilecounter++;
