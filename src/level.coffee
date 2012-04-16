@@ -156,11 +156,31 @@ class Level
 			else
 				console.log "Saved level: " + depth
 
-	addPlayer: (id, player) ->
+	canLeave: (id, direction) ->
+		mover = players[id]
+		if direction == "up" and mover.x == upx and mover.y == upy
+			delete players[id]
+			true
+		else if direction == "down" and mover.x == downx and mover.y == downy
+			delete players[id]
+			true
+		else
+			false
+		
+
+	addPlayer: (id, player, options) ->
 		if player.x == -1 or player.y == -1 or data[player.y][player.x] != "floor"
 			player.x = upx
 			player.y = upy
+		if options.stairs == true # They're coming via stairs, not by logging in.
+			if options.comingup == true # Coming via the down stair.
+				player.x = downx
+				player.y = downy
+			else # Coming via the up stair.
+				player.x = upx
+				player.y = upy
 		players[id] = player
+		true
 		
 	movePlayer: (socketid, vector) ->
 		subject = players[socketid]
@@ -173,22 +193,22 @@ class Level
 		subject.y += parseInt(vector[1])
 		true
 	
-	povObject: (id) ->
+	povObject: (sockets) ->
 		vision = 8 # How far can a PC see
-		radian = 0
-		subject = players[id]
-		elements = 
-			pcs: {}
-			terrain:
-				"wall":[]
-				"floor":[]
-				"upstair":[]
-				"downstair":[]
-				" ":[]
-		if players[id]
+		# subject = players[id]
+		for id, subject of players
+			radian = 0
+			elements = 
+				pcs: {}
+				terrain:
+					"wall":[]
+					"floor":[]
+					"upstair":[]
+					"downstair":[]
+					" ":[]
 			while radian <= 2 * Math.PI # Walk a circle around the character casting rays to the vision distance. Stop at walls and record what he can see.
-				centerx = players[id].x + .5
-				centery = players[id].y + .5
+				centerx = subject.x + .5
+				centery = subject.y + .5
 				xmove = Math.cos(radian)
 				ymove = Math.sin(radian)
 				wallbug = false
@@ -214,8 +234,9 @@ class Level
 						break unless wallbug
 						wallbug = false
 				radian += .025
-		elements.you = [subject.x, subject.y] # The player knows his own location, presumeably...
-		elements
+			elements.you = [subject.x, subject.y] # The player knows his own location, presumeably...
+			sockets.socket(id).emit 'update', elements
+		true
 
 	playerLogOut: (id) ->
 		delete players[id]

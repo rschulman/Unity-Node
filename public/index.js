@@ -182,6 +182,7 @@ $(document).ready(function() {
     $('html').keypress(function (event) {
         var keycode = (event.keyCode ? event.keyCode : event.which);
         var message = "";
+        console.log(keycode);
         switch (keycode) {
             case 104:
               message = "-1 0";
@@ -214,6 +215,14 @@ $(document).ready(function() {
             case 110:
               message = "1 1";
               webSocket.emit('move', message);
+              break;
+            case 60:
+              message = "up"
+              webSocket.emit('levelchange', message);
+              break;
+            case 62:
+              message = "down"
+              webSocket.emit('levelchange', message);
               break;
         }
     });

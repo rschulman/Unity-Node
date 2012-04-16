@@ -127,8 +127,20 @@ io.sockets.on 'connection', (socket) ->
                 dbplayer.y ?= -1
                 inserting = new Player dbplayer.name, dbplayer.pass, dbplayer.dlvl, dbplayer.xp, dbplayer.x, dbplayer.y, dbplayer.sessionID
                 ourState.addPlayer socket.id, inserting
-                ourState.getLevel(inserting.getLevel()).addPlayer socket.id, inserting
-                client.emit 'update', ourState.getLevel(inserting.getLevel()).povObject(id) for id, client of io.sockets.sockets
+                where = inserting.getLevel()
+                if ourState.getLevel where
+                    ourState.getLevel(inserting.getLevel()).addPlayer socket.id, inserting, {stairs: false}
+                    ourState.getLevel(inserting.getLevel()).povObject(io.sockets)
+                else
+                    levelCollection.find {dlvl: where}, (err, cursor) ->
+                        cursor.count (err, number) ->
+                            if number == 1
+                                console.log "Level exists in DB"
+                                cursor.nextObject (err, loadlevel) ->
+                                    ourState.addLevel where, new Level {generate: false}, loadlevel
+                                    console.log "Loaded level " + where + " from db"
+                                    ourState.getLevel(inserting.getLevel()).povObject(io.sockets)
+                socket.join inserting.getLevel()
 
     socket.on 'level chat', (message) ->
         player = ourState.getPlayer(socket.id)
@@ -144,8 +156,13 @@ io.sockets.on 'connection', (socket) ->
     socket.on 'move', (message) ->
         where = ourState.getPlayer(socket.id).getLevel()
         ourState.getLevel(where).movePlayer(socket.id, message.split " ")
-        client.emit 'update', ourState.getLevel(where).povObject(id) for id, client of io.sockets.sockets
+        ourState.getLevel(where).povObject(io.sockets)
         true
+
+    socket.on 'levelchange', (message) ->
+        ourState.playerLevelMove socket.id, message, levelCollection, (where, newwhere) ->
+            ourState.getLevel(where).povObject(io.sockets)
+            ourState.getLevel(newwhere).povObject(io.sockets)
 
     socket.on 'disconnect', () ->
         departing = ourState.getPlayer(socket.id)
@@ -163,7 +180,7 @@ io.sockets.on 'connection', (socket) ->
                 console.log "Saved player: " + departing.getName()
         ourState.getLevel(departing.getLevel()).playerLogOut socket.id
         ourState.playerLogOut socket.id
-        client.emit 'update', ourState.getLevel(departing.getLevel()).povObject(id) for id, client of io.sockets.sockets when id isnt socket.id
+        #client.emit 'update', ourState.getLevel(departing.getLevel()).povObject(id) for id, client of io.sockets.sockets when id isnt socket.id
         true
     
     true
