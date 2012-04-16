@@ -47,42 +47,56 @@ var constructMap = function (object_data, tempCopy) {
 	if (centery > 1000 - WINDOW/2) {
 		centery = 1000 - WINDOW/2;
 	}
-	$("#map").empty();
+    var our_canvas = $("#map");
+    var ctx = our_canvas.getContext('2d');
+    ctx.clearRect(0, 0, our_canvas.width(), our_canvas.height());
 	var tilecounter = 0;
+    ctx.fillStyle = "rgb(41,41,41,)";
+    ctx.fillRect(0,0, our_canvas.width(), our_canvas.height());
 	for (_j = centery - WINDOW/2, _len2 = centery + WINDOW/2; _j < _len2; _j++) {
       row = tempCopy[_j];
       for (_x = centerx - WINDOW/2, _len3 = centerx + WINDOW/2; _x < _len3; _x++) {
         if (row[_x].visible) {
-          var divbuild = '<div class="tile visible';
-		  if (row[_x].contents == "player") {
-            divbuild += row[_x].id;
+          if (row[_x].tile == "floor") {
+            ctx.fillStyle = "rgb(230,230,230)";
           }
-          divbuild += " " + row[_x].tile + '" style="top: ' + Math.floor(tilecounter/40) * 16 + 'px; left: ' + (tilecounter % 40) * 16 + 'px;">';
+          if (row[_x].tile == "wall") {
+            ctx.fillStyle = "rgb(102,102,102)";
+          }
+          ctx.fillRect(Math.floor(tilecounter/40), tilecounter % 40, 15, 15); // Top, left, width, height
           if (row[_x].contents == "player") {
-		    divbuild += "@";
+            ctx.font = ".9em monospace"
+            ctx.fillText("@", Math.floor(tilecounter/40) + 7, (tilecounter % 40) + 7);
 		  }
 		  if (row[_x].tile == "upstair") {
-		    divbuild += "<";
+            ctx.font = ".9em monospace"
+            ctx.fillText("<", Math.floor(tilecounter/40) + 7, (tilecounter % 40) + 7);
 		  }
 		  if (row[_x].tile == "downstair") {
-		    divbuild += ">";
+            ctx.font = ".9em monospace"
+            ctx.fillText(">", Math.floor(tilecounter/40) + 7, (tilecounter % 40) + 7);
 		  }
-		  divbuild += "</div>";
-          $("#map").append(divbuild);
         }
         else if (row[_x].remembered) {
-	          var divbuild = '<div class="tile remembered ' + row[_x].tile + '" style="top: ' + Math.floor(tilecounter/40) * 16 + 'px; left: ' + (tilecounter % 40) * 16 + 'px;">';
-	          if (row[_x].tile == "player") {
-			    divbuild += "@";
-			  }
-			  if (row[_x].tile == "upstair") {
-			    divbuild += "<";
-			  }
-			  if (row[_x].tile == "downstair") {
-			    divbuild += ">";
-			  }
-			  divbuild += "</div>";
-	          $("#map").append(divbuild);
+          if (row[_x].tile == "floor") {
+            ctx.fillStyle = "rgb(178,178,178)";
+          }
+          if (row[_x].tile == "wall") {
+            ctx.fillStyle = "rgb(51,51,51)";
+          }
+          ctx.fillRect(Math.floor(tilecounter/40), tilecounter % 40, 15, 15); // Top, left, width, height
+          if (row[_x].contents == "player") {
+            ctx.font = ".9em monospace"
+            ctx.fillText("@", Math.floor(tilecounter/40) + 7, (tilecounter % 40) + 7);
+          }
+          if (row[_x].tile == "upstair") {
+            ctx.font = ".9em monospace"
+            ctx.fillText("<", Math.floor(tilecounter/40) + 7, (tilecounter % 40) + 7);
+          }
+          if (row[_x].tile == "downstair") {
+            ctx.font = ".9em monospace"
+            ctx.fillText(">", Math.floor(tilecounter/40) + 7, (tilecounter % 40) + 7);
+          }
 	    }
 		tilecounter++;
       }
@@ -151,7 +165,7 @@ $(document).ready(function() {
     });
 
 
-	$("#map").on("click", ".tile", function (event) {
+	$("#map").on("click", function (event) {
 		var infotext = "<p>A ";
 		var $target = $(event.target);
 		if ($target.hasClass("visible")) {
