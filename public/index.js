@@ -72,19 +72,25 @@ var constructMap = function (object_data, tempCopy) {
             ctx.fillStyle = "rgb(51,51,51)";
           }
         }
-        ctx.fillRect(Math.floor(tilecounter/40) * 15, (tilecounter % 40) * 15, 15, 15); // Top, left, width, height
-        if (row[_x].contents == "player") {
-          ctx.font = ".9em monospace"
-          ctx.fillText("@", Math.floor(tilecounter/40) * 15 + 7, (tilecounter % 40) * 15 + 7);
+        if (row[_x].visible || row[_x].remembered) {
+	  ctx.fillRect(Math.floor(tilecounter/40) * 15, (tilecounter % 40) * 15, 15, 15); // Top, left, width, height
+	  ctx.strokeStyle = "rgb(85,98,102,0.2)";
+          ctx.lineWidth = .3;
+          ctx.strokeRect(Math.floor(tilecounter/40) * 15, (tilecounter % 40) * 15, 15, 15);
+          ctx.fillStyle = "rgb(36,36,36)";
+	  if (row[_x].contents == "player") {
+            ctx.font = "1.2em monospace"
+            ctx.fillText("@", Math.floor(tilecounter/40) * 15 + 7, (tilecounter % 40) * 15 + 7);
 	    }
-	    if (row[_x].tile == "upstair") {
-          ctx.font = ".9em monospace"
-          ctx.fillText("<", Math.floor(tilecounter/40) * 15 + 7, (tilecounter % 40) * 15 + 7);
-	    }
-	    if (row[_x].tile == "downstair") {
-          ctx.font = ".9em monospace"
-          ctx.fillText(">", Math.floor(tilecounter/40) * 15 + 7, (tilecounter % 40) * 15 + 7);
-	    }
+	  if (row[_x].tile == "upstair") {
+            ctx.font = ".9em monospace"
+            ctx.fillText("<", Math.floor(tilecounter/40) * 15 + 7, (tilecounter % 40) * 15 + 7);
+	  }
+	  if (row[_x].tile == "downstair") {
+            ctx.font = ".9em monospace"
+            ctx.fillText(">", Math.floor(tilecounter/40) * 15 + 7, (tilecounter % 40) * 15 + 7);
+	  }
+	}
         tilecounter++;
       }
     }
