@@ -193,7 +193,7 @@ $(document).ready(function() {
         var tile = tempCopy[absolutecell[0]][absolutecell[1]];
         console.log(tile);
         if (tile.selected == true) {
-            tile.selected = false;
+            tempCopy[absolutecell[0]][absolutecell[1]].selected = false;
             $("#info").html("");
         }
         else {
@@ -204,7 +204,7 @@ $(document).ready(function() {
                 row[_j].selected = false;
               }
             }
-            tile.selected = true;
+            tempCopy[absolutecell[0]][absolutecell[1]].selected = true;
             if (tile.visible == true) {
                 infotext += "visible ";
             }
