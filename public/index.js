@@ -201,6 +201,13 @@ $(document).ready(function() {
             $("#info").html("");
         }
         else {
+            var _i, _len, row, _j, _len2;
+            for (_i = 0, _len = tempCopy.length; _i < _len; _i++) {
+              row = tempCopy[_i];
+              for (_j = 0, _len2 = row.length; _j < _len2; _j++) {
+                row[_j].selected = false;
+              }
+            }
             tile.selected = true;
             if (tile.visible == true) {
                 infotext += "visible ";
