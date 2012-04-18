@@ -1,3 +1,4 @@
+var WINDOW = 40;
 var getCursorPosition = function (e) {
     var x, y;
     if (e.pageX != undefined && e.pageY != undefined) {
@@ -17,7 +18,6 @@ var getCursorPosition = function (e) {
 }
 
 var drawMap = function (tempCopy, centery, centerx) {
-    var WINDOW = 40;
     if (centerx < WINDOW/2) {
         centerx = WINDOW/2;
     }
@@ -85,7 +85,6 @@ var drawMap = function (tempCopy, centery, centerx) {
 
 var constructMap = function (object_data, tempCopy) {
 	var key, location, _ref;
-	var WINDOW = 40;
 	var col, row, _i, _j, _len, _len2;
     var userx, usery;
 
