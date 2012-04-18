@@ -34,10 +34,12 @@ var drawMap = function (tempCopy, centery, centerx) {
     var ctx = our_canvas.get(0).getContext('2d');
     var tilecounter = 0;
     ctx.fillStyle = "rgb(41,41,41)";
+    ctx.lineWidth = .3;
     ctx.fillRect(0,0, our_canvas.width(), our_canvas.height());
     for (_j = centery - WINDOW/2, _len2 = centery + WINDOW/2; _j < _len2; _j++) {
       row = tempCopy[_j];
       for (_x = centerx - WINDOW/2, _len3 = centerx + WINDOW/2; _x < _len3; _x++) {
+        ctx.strokeStyle = "rgb(85,98,102,0.2)";
         if (row[_x].visible) {
           if (row[_x].tile == "floor" || row[_x].tile == "upstair" || row[_x].tile == "downstair") {
             ctx.fillStyle = "rgb(230,230,230)";
@@ -57,14 +59,8 @@ var drawMap = function (tempCopy, centery, centerx) {
         if (row[_x].visible || row[_x].remembered) {
           ctx.fillRect((tilecounter % 40) * 15, Math.floor(tilecounter/40) * 15, 15, 15); // Top, left, width, height
           if (row[_x].selected == true) {
-            console.log("Drawing a selected tile.");
             ctx.strokeStyle = "rgb(64,153,0)";
           }
-          else {
-            console.log("Setting to non selected.");
-            ctx.strokeStyle = "rgb(85,98,102,0.2)";
-          }
-          ctx.lineWidth = .3;
           ctx.strokeRect((tilecounter % 40) * 15, Math.floor(tilecounter/40) * 15, 15, 15);
           ctx.fillStyle = "rgb(36,36,36)";
           if (row[_x].contents == "player") {
