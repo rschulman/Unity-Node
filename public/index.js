@@ -11,9 +11,9 @@ var getCursorPosition = function (e) {
         y = e.clientY + document.body.scrollTop +
             document.documentElement.scrollTop;
     }
-    x -= $('#map').offsetLeft;
-    y -= $('#map').offsetTop;
-
+    var offset = $('#map').offset();
+    x -= offset.left;
+    y -= offset.top;
     return [Math.floor(y/15), Math.floor(x/15)];
 }
 
@@ -57,9 +57,11 @@ var drawMap = function (tempCopy, centery, centerx) {
         if (row[_x].visible || row[_x].remembered) {
           ctx.fillRect((tilecounter % 40) * 15, Math.floor(tilecounter/40) * 15, 15, 15); // Top, left, width, height
           if (row[_x].selected == true) {
-            ctx.strokeStyle = "rgb(64,153,0,0.2)";
+            console.log("Drawing a selected tile.");
+            ctx.strokeStyle = "rgb(64,153,0)";
           }
           else {
+            console.log("Setting to non selected.");
             ctx.strokeStyle = "rgb(85,98,102,0.2)";
           }
           ctx.lineWidth = .3;
@@ -174,7 +176,7 @@ $(document).ready(function() {
 
 	$("#map").click(function (event) {
 		var infotext = "<p>A ";
-        var absolutecell = getCursorPosition(event);
+        var relativecell = getCursorPosition(event);
         var visionx = userx;
         var visiony = usery;
         if (userx < WINDOW/2) {
@@ -191,8 +193,9 @@ $(document).ready(function() {
         }
         visiony -= WINDOW/2;
         visionx -= WINDOW/2;
-        var relativecell = [absolutecell[0] - visiony, absolutecell[1] - visionx];
-        var tile = tempCopy[relativecell[0], relativecell[1]];
+        var absolutecell = [relativecell[0] + visiony, relativecell[1] + visionx];
+        var tile = tempCopy[absolutecell[0]][absolutecell[1]];
+        console.log(tile);
         if (tile.selected == true) {
             tile.selected = false;
             $("#info").html("");
