@@ -17,6 +17,7 @@ var getCursorPosition = function (e) {
 }
 
 var drawMap = function (tempCopy, centery, centerx) {
+    var WINDOW = 40;
     if (centerx < WINDOW/2) {
         centerx = WINDOW/2;
     }
