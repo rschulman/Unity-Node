@@ -59,7 +59,11 @@ var drawMap = function (tempCopy, centery, centerx) {
         if (row[_x].visible || row[_x].remembered) {
           ctx.fillRect((tilecounter % 40) * 15, Math.floor(tilecounter/40) * 15, 15, 15); // Top, left, width, height
           if (row[_x].selected == true) {
-            ctx.strokeStyle = "rgb(64,153,0)";
+            console.log(row[_x]);
+            ctx.strokeStyle = "rgb(92,212,0)";
+          }
+          if (row[_x].selected == false) {
+            ctx.strokeStyle = "rgb(85,98,102)";
           }
           ctx.strokeRect((tilecounter % 40) * 15, Math.floor(tilecounter/40) * 15, 15, 15);
           ctx.fillStyle = "rgb(36,36,36)";
@@ -191,7 +195,7 @@ $(document).ready(function() {
         visionx -= WINDOW/2;
         var absolutecell = [relativecell[0] + visiony, relativecell[1] + visionx];
         var tile = tempCopy[absolutecell[0]][absolutecell[1]];
-        console.log(tile);
+        //console.log(tile);
         if (tile.selected == true) {
             tempCopy[absolutecell[0]][absolutecell[1]].selected = false;
             $("#info").html("");
