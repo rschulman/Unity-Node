@@ -42,10 +42,20 @@ var drawMap = function (tempCopy, centery, centerx) {
         ctx.strokeStyle = "rgb(85,98,102,0.2)";
         if (row[_x].visible) {
           if (row[_x].tile == "floor" || row[_x].tile == "upstair" || row[_x].tile == "downstair") {
-            ctx.fillStyle = "rgb(230,230,230)";
+            if (row[_x].selected == true) {
+              ctx.fillStyle = "rgb(165,232,168)";
+            }
+            else {
+              ctx.fillStyle = "rgb(230,230,230)";
+            }
           }
           if (row[_x].tile == "wall") {
-            ctx.fillStyle = "rgb(102,102,102)";
+            if (row[_x].selected == true) {
+              ctx.fillStyle = "rgb(68,97,67)";
+            }
+            else {
+              ctx.fillStyle = "rgb(102,102,102)";
+            }
           }
         }
         else if (row[_x].remembered) {
@@ -58,13 +68,7 @@ var drawMap = function (tempCopy, centery, centerx) {
         }
         if (row[_x].visible || row[_x].remembered) {
           ctx.fillRect((tilecounter % 40) * 15, Math.floor(tilecounter/40) * 15, 15, 15); // Top, left, width, height
-          if (row[_x].selected == true) {
-            console.log(row[_x]);
-            ctx.strokeStyle = "rgb(92,212,0)";
-          }
-          if (row[_x].selected == false) {
-            ctx.strokeStyle = "rgb(85,98,102)";
-          }
+          ctx.strokeStyle = "rgb(85,98,102)";
           ctx.strokeRect((tilecounter % 40) * 15, Math.floor(tilecounter/40) * 15, 15, 15);
           ctx.fillStyle = "rgb(36,36,36)";
           if (row[_x].contents == "player") {
