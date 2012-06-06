@@ -135,6 +135,7 @@ class Level
 					doneup = true
 				stairrow = Math.floor Math.random() * MAXROWS
 				staircol = Math.floor Math.random() * MAXCOLS
+			
 
 	save: (levelCollection, depth) ->
 		terrain =

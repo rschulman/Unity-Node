@@ -4,9 +4,9 @@ chai.should()
 Player = require '../src/player'
 
 describe 'Player instance', ->
-    player = new Player 'Ross', 'ross', 1, 0, 1, 2, 'abcd', 18, 16, 16, 12
-    player2 = new Player 'Ross', 'ross', 1, 99, 1, 2, 'abcd', 18, 16, 16, 12
-    player3 = new Player 'Ross', 'ross', 1, 101, 1, 2, 'abcd', 18, 16, 16, 12
+    player = new Player 'Ross', 'ross', 1, 0, 1, 2, 'abcd', 18, 16, 16, 12, 0
+    player2 = new Player 'Ross', 'ross', 1, 99, 1, 2, 'abcd', 18, 16, 16, 12, 15
+    player3 = new Player 'Ross', 'ross', 1, 101, 1, 2, 'abcd', 18, 16, 16, 12, 15
     it 'should have a name', ->
         player.name.should.equal 'Ross'
     it 'should have a password', ->
@@ -30,3 +30,5 @@ describe 'Player instance', ->
         player.getXPLevel().should.equal 1
         player2.getXPLevel().should.equal 1
         player3.getXPLevel().should.equal 2
+    it 'should compute max HP', ->
+        player.maxHP.should.equal 15
